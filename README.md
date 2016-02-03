@@ -10,7 +10,7 @@ This is a work in progress - There is sparse documentation, no tests, and it's n
 One command and you're ready to roll:
 
 ```
-npm install tahoe --save
+npm install tahoe
 ```
 
 **Now**, check out the [documentation](http://shasta.tools/tahoe/docs) to get started!

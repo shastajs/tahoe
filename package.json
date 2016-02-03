@@ -12,6 +12,7 @@
     "http",
     "request",
     "resource",
+    "actions",
     "shasta",
     "shastajs",
     "shastaplugin"
