@@ -38,14 +38,16 @@ var setResponse = function setResponse(state, _ref4) {
   var payload = _ref4.payload;
 
   if (!meta.requestId) return state;
-  return state.set(meta.requestId, (0, _immutable.fromJS)(payload.raw));
+  var path = meta.requestId.split('.');
+  return state.setIn(path, (0, _immutable.fromJS)(payload.raw));
 };
 var insertToResponse = function insertToResponse(state, _ref5) {
   var meta = _ref5.meta;
   var payload = _ref5.payload;
 
   if (!meta.requestId) return state;
-  return state.update(meta.requestId, function (v) {
+  var path = meta.requestId.split('.');
+  return state.updateIn(path, function (v) {
     var newDoc = (0, _immutable.fromJS)(payload.raw);
     if (!_immutable.List.isList(v)) return newDoc;
     return v.push(newDoc);
@@ -56,7 +58,8 @@ var updateResponse = function updateResponse(state, _ref6) {
   var payload = _ref6.payload;
 
   if (!meta.requestId) return state;
-  return state.update(meta.requestId, function (v) {
+  var path = meta.requestId.split('.');
+  return state.updateIn(path, function (v) {
     var next = (0, _immutable.fromJS)(payload.raw.next);
     if (!_immutable.List.isList(v)) return next;
 
@@ -72,9 +75,10 @@ var deleteFromResponse = function deleteFromResponse(state, _ref7) {
   var payload = _ref7.payload;
 
   if (!meta.requestId) return state;
-  if (!_immutable.List.isList(state.get(meta.requestId))) return state.remove(meta.requestId);
+  var path = meta.requestId.split('.');
+  if (!_immutable.List.isList(state.getIn(path))) return state.removeIn(path);
 
-  return state.update(meta.requestId, function (v) {
+  return state.updateIn(path, function (v) {
     var prevId = payload.raw.id;
     var idx = v.findIndex(function (i) {
       return i.get('id') === prevId;
@@ -88,7 +92,8 @@ var setResponseError = function setResponseError(state, _ref8) {
   var payload = _ref8.payload;
 
   if (meta.requestId) {
-    return state.set(meta.requestId, (0, _immutable.Map)({ error: payload }));
+    var path = meta.requestId.split('.');
+    return state.setIn(path, (0, _immutable.Map)({ error: payload }));
   }
   return state;
 };
