@@ -10,7 +10,7 @@ const result = (fn, arg) => typeof fn === 'function' ? fn(arg) : fn
 app must have redux-thunk installed
 possible options:
 
-- requestId (required)(string)
+- requestId (optional)(string)
 - tail (default false)(boolean)
 - method (required)(get, post, put, delete, or patch)
 - params (object)
@@ -30,7 +30,6 @@ export default (defaults = {}) => (opt = {}) => {
     result(v, o.params)
   )
 
-  if (!options.requestId) throw new Error('Missing requestId option!')
   if (!options.method) throw new Error('Missing method')
   if (!options.endpoint) throw new Error('Missing endpoint')
 

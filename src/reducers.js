@@ -21,11 +21,13 @@ const deleteEntities = (state, { payload }) => {
 // request state
 const setResponse = (state, { meta, payload }) => {
   if (!meta.requestId) return state
-  return state.set(meta.requestId, fromJS(payload.raw))
+  let path = meta.requestId.split('.')
+  return state.setIn(path, fromJS(payload.raw))
 }
 const insertToResponse = (state, { meta, payload }) => {
   if (!meta.requestId) return state
-  return state.update(meta.requestId, (v) => {
+  let path = meta.requestId.split('.')
+  return state.updateIn(path, (v) => {
     let newDoc = fromJS(payload.raw)
     if (!List.isList(v)) return newDoc
     return v.push(newDoc)
@@ -33,7 +35,8 @@ const insertToResponse = (state, { meta, payload }) => {
 }
 const updateResponse = (state, { meta, payload }) => {
   if (!meta.requestId) return state
-  return state.update(meta.requestId, (v) => {
+  let path = meta.requestId.split('.')
+  return state.updateIn(path, (v) => {
     let next = fromJS(payload.raw.next)
     if (!List.isList(v)) return next
 
@@ -44,9 +47,10 @@ const updateResponse = (state, { meta, payload }) => {
 }
 const deleteFromResponse = (state, { meta, payload }) => {
   if (!meta.requestId) return state
-  if (!List.isList(state.get(meta.requestId))) return state.remove(meta.requestId)
+  let path = meta.requestId.split('.')
+  if (!List.isList(state.getIn(path))) return state.removeIn(path)
 
-  return state.update(meta.requestId, (v) => {
+  return state.updateIn(path, (v) => {
     let prevId = payload.raw.id
     let idx = v.findIndex((i) => i.get('id') === prevId)
     return v.delete(idx)
@@ -55,7 +59,8 @@ const deleteFromResponse = (state, { meta, payload }) => {
 
 const setResponseError = (state, { meta, payload }) => {
   if (meta.requestId) {
-    return state.set(meta.requestId, Map({ error: payload }))
+    let path = meta.requestId.split('.')
+    return state.setIn(path, Map({ error: payload }))
   }
   return state
 }
