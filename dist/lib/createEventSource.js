@@ -1,8 +1,16 @@
 'use strict';
 
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _url = require('url');
+
+var _url2 = _interopRequireDefault(_url);
 
 var _entify = require('./entify');
 
@@ -63,8 +71,16 @@ var handleDelete = function handleDelete(data, opt, dispatch) {
   });
 };
 
-exports.default = function (url, opt, dispatch) {
-  var src = new EventSource(url, opt);
+var combineUrl = function combineUrl(endpoint, query) {
+  var ay = _url2.default.parse(endpoint, true);
+  delete ay.querystring;
+  ay.query = (0, _extends3.default)({}, ay.query, query);
+  return _url2.default.format(ay);
+};
+
+exports.default = function (opt, dispatch) {
+  var finalUrl = combineUrl(opt.endpoint, opt.query);
+  var src = new EventSource(finalUrl, { withCredentials: opt.withCredentials });
   src.addEventListener('insert', handleMessage(opt, dispatch, handleInsert));
   src.addEventListener('update', handleMessage(opt, dispatch, handleUpdate));
   src.addEventListener('delete', handleMessage(opt, dispatch, handleDelete));

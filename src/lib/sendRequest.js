@@ -8,6 +8,10 @@ export default (opt) => (dispatch) => {
     payload: opt
   })
 
+  if (opt.tail) {
+    return createEventSource(opt, dispatch)
+  }
+
   let req = request[opt.method.toLowerCase()](opt.endpoint)
 
   if (opt.headers) {
@@ -21,10 +25,6 @@ export default (opt) => (dispatch) => {
   }
   if (opt.withCredentials) {
     req = req.withCredentials()
-  }
-
-  if (opt.tail) {
-    return createEventSource(req.url, opt, dispatch)
   }
 
   req.end((err, res) => {

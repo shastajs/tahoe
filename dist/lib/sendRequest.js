@@ -25,6 +25,10 @@ exports.default = function (opt) {
       payload: opt
     });
 
+    if (opt.tail) {
+      return (0, _createEventSource2.default)(opt, dispatch);
+    }
+
     var req = _superagent2.default[opt.method.toLowerCase()](opt.endpoint);
 
     if (opt.headers) {
@@ -38,10 +42,6 @@ exports.default = function (opt) {
     }
     if (opt.withCredentials) {
       req = req.withCredentials();
-    }
-
-    if (opt.tail) {
-      return (0, _createEventSource2.default)(req.url, opt, dispatch);
     }
 
     req.end(function (err, res) {

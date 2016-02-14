@@ -101,11 +101,12 @@
   },
   "dependencies": {
     "babel-runtime": "^6.3.19",
+    "immutable": "^3.7.6",
     "lodash.mapvalues": "^4.0.1",
     "lodash.merge": "^4.0.3",
     "normalizr": "^2.0.0",
     "redux-actions": "^0.9.1",
     "superagent": "^1.7.2",
-    "immutable": "^3.7.6"
+    "url": "^0.11.0"
   }
 }
