@@ -59,7 +59,7 @@
     "babel-preset-stage-0": "^6.3.13",
     "babel-register": "^6.4.3",
     "babelify": "^7.2.0",
-    "eslint": "^2.3.0",
+    "eslint": "2.2.0",
     "eslint-cli": "^1.0.0",
     "eslint-config-rackt": "^1.1.1",
     "eslint-plugin-react": "^4.2.1",
@@ -84,13 +84,22 @@
   "eslintConfig": {
     "parser": "babel-eslint",
     "extends": "rackt",
+    "plugins": [
+      "react"
+    ],
     "env": {
       "browser": true,
       "node": true,
       "es6": true
     },
+    "globals": {
+      "__DEV__": true,
+      "__PROD__": true,
+      "__INITIAL_STATE__": true
+    },
     "ecmaFeatures": {
-      "modules": true
+      "modules": true,
+      "jsx": true
     },
     "rules": {
       "semi": [
