@@ -52,9 +52,7 @@ exports.default = function (opt) {
         return dispatch({
           type: 'tahoe.failure',
           meta: opt,
-          payload: {
-            error: err
-          }
+          payload: err
         });
       }
 

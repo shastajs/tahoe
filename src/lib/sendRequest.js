@@ -32,9 +32,7 @@ export default (opt) => (dispatch) => {
       return dispatch({
         type: 'tahoe.failure',
         meta: opt,
-        payload: {
-          error: err
-        }
+        payload: err
       })
     }
 

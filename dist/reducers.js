@@ -95,11 +95,11 @@ var deleteFromResponse = function deleteFromResponse(state, _ref7) {
 
 var setResponseError = function setResponseError(state, _ref8) {
   var subset = _ref8.meta.subset;
-  var error = _ref8.payload.error;
+  var payload = _ref8.payload;
 
   if (subset) {
     var path = subset.split('.');
-    return state.setIn([].concat((0, _toConsumableArray3.default)(path), ['error']), error);
+    return state.setIn([].concat((0, _toConsumableArray3.default)(path), ['error']), payload);
   }
   return state;
 };

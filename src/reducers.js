@@ -57,10 +57,10 @@ const deleteFromResponse = (state, { meta: { subset }, payload: { raw } }) => {
   })
 }
 
-const setResponseError = (state, { meta: { subset }, payload: { error } }) => {
+const setResponseError = (state, { meta: { subset }, payload }) => {
   if (subset) {
     const path = subset.split('.')
-    return state.setIn([ ...path, 'error' ], error)
+    return state.setIn([ ...path, 'error' ], payload)
   }
   return state
 }
