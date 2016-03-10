@@ -1,69 +1,75 @@
 'use strict';
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.requests = exports.collections = undefined;
+exports.subsets = exports.collections = undefined;
 
 var _reduxActions = require('redux-actions');
 
 var _immutable = require('immutable');
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var initialCollections = (0, _immutable.Map)();
-var initialRequests = (0, _immutable.Map)();
+var initialSubsets = (0, _immutable.Map)();
 
 // shallow entity state
 var addEntities = function addEntities(state, _ref) {
-  var payload = _ref.payload;
+  var normalized = _ref.payload.normalized;
 
-  if (!payload.normalized) return state;
-  return (0, _immutable.fromJS)(payload.normalized.entities).mergeDeep(state);
+  if (!normalized) return state;
+  return (0, _immutable.fromJS)(normalized.entities).mergeDeep(state);
 };
 var updateEntities = function updateEntities(state, _ref2) {
-  var payload = _ref2.payload;
+  var normalized = _ref2.payload.normalized;
 
-  if (!payload.normalized) return state;
-  return state.mergeDeep((0, _immutable.fromJS)(payload.normalized.next.entities));
+  if (!normalized) return state;
+  return state.mergeDeep((0, _immutable.fromJS)(normalized.next.entities));
 };
 var deleteEntities = function deleteEntities(state, _ref3) {
-  var payload = _ref3.payload;
+  var normalized = _ref3.payload.normalized;
 
-  if (!payload.normalized) return state;
+  if (!normalized) return state;
   return state;
 };
 
-// request state
+// subset state
 var setResponse = function setResponse(state, _ref4) {
-  var meta = _ref4.meta;
-  var payload = _ref4.payload;
+  var subset = _ref4.meta.subset;
+  var raw = _ref4.payload.raw;
 
-  if (!meta.requestId) return state;
-  var path = meta.requestId.split('.');
-  return state.setIn(path, (0, _immutable.fromJS)(payload.raw));
+  if (!subset) return state;
+  var path = subset.split('.');
+  return state.setIn(path, (0, _immutable.fromJS)(raw));
 };
 var insertToResponse = function insertToResponse(state, _ref5) {
-  var meta = _ref5.meta;
-  var payload = _ref5.payload;
+  var subset = _ref5.meta.subset;
+  var raw = _ref5.payload.raw;
 
-  if (!meta.requestId) return state;
-  var path = meta.requestId.split('.');
+  if (!subset) return state;
+  var path = subset.split('.');
   return state.updateIn(path, function (v) {
-    var newDoc = (0, _immutable.fromJS)(payload.raw);
+    var newDoc = (0, _immutable.fromJS)(raw);
     if (!_immutable.List.isList(v)) return newDoc;
     return v.push(newDoc);
   });
 };
 var updateResponse = function updateResponse(state, _ref6) {
-  var meta = _ref6.meta;
-  var payload = _ref6.payload;
+  var subset = _ref6.meta.subset;
+  var raw = _ref6.payload.raw;
 
-  if (!meta.requestId) return state;
-  var path = meta.requestId.split('.');
+  if (!subset) return state;
+  var path = subset.split('.');
   return state.updateIn(path, function (v) {
-    var next = (0, _immutable.fromJS)(payload.raw.next);
+    var next = (0, _immutable.fromJS)(raw.next);
     if (!_immutable.List.isList(v)) return next;
 
-    var prevId = payload.raw.prev.id;
+    var prevId = raw.prev.id;
     var idx = v.findIndex(function (i) {
       return i.get('id') === prevId;
     });
@@ -71,15 +77,15 @@ var updateResponse = function updateResponse(state, _ref6) {
   });
 };
 var deleteFromResponse = function deleteFromResponse(state, _ref7) {
-  var meta = _ref7.meta;
-  var payload = _ref7.payload;
+  var subset = _ref7.meta.subset;
+  var raw = _ref7.payload.raw;
 
-  if (!meta.requestId) return state;
-  var path = meta.requestId.split('.');
+  if (!subset) return state;
+  var path = subset.split('.');
   if (!_immutable.List.isList(state.getIn(path))) return state.removeIn(path);
 
   return state.updateIn(path, function (v) {
-    var prevId = payload.raw.id;
+    var prevId = raw.id;
     var idx = v.findIndex(function (i) {
       return i.get('id') === prevId;
     });
@@ -88,12 +94,12 @@ var deleteFromResponse = function deleteFromResponse(state, _ref7) {
 };
 
 var setResponseError = function setResponseError(state, _ref8) {
-  var meta = _ref8.meta;
-  var payload = _ref8.payload;
+  var subset = _ref8.meta.subset;
+  var error = _ref8.payload.error;
 
-  if (meta.requestId) {
-    var path = meta.requestId.split('.');
-    return state.setIn(path, (0, _immutable.Map)({ error: payload }));
+  if (subset) {
+    var path = subset.split('.');
+    return state.setIn([].concat((0, _toConsumableArray3.default)(path), ['error']), error);
   }
   return state;
 };
@@ -106,10 +112,10 @@ var collections = exports.collections = (0, _reduxActions.handleActions)({
   'tahoe.tail.delete': deleteEntities
 }, initialCollections);
 
-var requests = exports.requests = (0, _reduxActions.handleActions)({
+var subsets = exports.subsets = (0, _reduxActions.handleActions)({
   'tahoe.success': setResponse,
   'tahoe.failure': setResponseError,
   'tahoe.tail.insert': insertToResponse,
   'tahoe.tail.update': updateResponse,
   'tahoe.tail.delete': deleteFromResponse
-}, initialRequests);
+}, initialSubsets);

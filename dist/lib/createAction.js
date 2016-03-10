@@ -28,7 +28,7 @@ var result = function result(fn, arg) {
 app must have redux-thunk installed
 possible options:
 
-- requestId (optional)(string)
+- subset (optional)(string)
 - tail (default false)(boolean)
 - method (required)(get, post, put, delete, or patch)
 - params (object)
@@ -48,8 +48,9 @@ exports.default = function () {
     // merge our multitude of option objects together
     // defaults = options defined in createAction
     // opt = options specified in action creator
-    var options = (0, _lodash2.default)((0, _lodash4.default)({}, opt, defaults), function (v, k, o) {
-      return result(v, o.params);
+    var options = (0, _lodash2.default)((0, _lodash4.default)({}, opt, defaults), function (v, k, _ref) {
+      var params = _ref.params;
+      return result(v, params);
     });
 
     if (!options.method) throw new Error('Missing method');

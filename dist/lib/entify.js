@@ -6,8 +6,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _normalizr = require('normalizr');
 
-exports.default = function (body, opt) {
-  return (0, _normalizr.normalize)(body, opt.collection ? (0, _normalizr.arrayOf)(opt.model) : opt.model);
+exports.default = function (body, _ref) {
+  var collection = _ref.collection;
+  var model = _ref.model;
+  return (0, _normalizr.normalize)(body, collection ? (0, _normalizr.arrayOf)(model) : model);
 };
 
 module.exports = exports['default'];

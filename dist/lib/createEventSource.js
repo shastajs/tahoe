@@ -34,39 +34,43 @@ var handleMessage = function handleMessage(opt, dispatch, fn) {
   };
 };
 
-var handleInsert = function handleInsert(data, opt, dispatch) {
+var handleInsert = function handleInsert(_ref2, opt, dispatch) {
+  var next = _ref2.next;
   return dispatch({
     type: 'tahoe.tail.insert',
     meta: opt,
     payload: {
-      normalized: (0, _entify2.default)(data.next, opt),
-      raw: data.next
+      normalized: (0, _entify2.default)(next, opt),
+      raw: next
     }
   });
 };
-var handleUpdate = function handleUpdate(data, opt, dispatch) {
+var handleUpdate = function handleUpdate(_ref3, opt, dispatch) {
+  var prev = _ref3.prev;
+  var next = _ref3.next;
   return dispatch({
     type: 'tahoe.tail.update',
     meta: opt,
     payload: {
       normalized: {
-        prev: (0, _entify2.default)(data.prev, opt),
-        next: (0, _entify2.default)(data.next, opt)
+        prev: (0, _entify2.default)(prev, opt),
+        next: (0, _entify2.default)(next, opt)
       },
       raw: {
-        prev: data.prev,
-        next: data.next
+        prev: prev,
+        next: next
       }
     }
   });
 };
-var handleDelete = function handleDelete(data, opt, dispatch) {
+var handleDelete = function handleDelete(_ref4, opt, dispatch) {
+  var prev = _ref4.prev;
   return dispatch({
     type: 'tahoe.tail.delete',
     meta: opt,
     payload: {
-      normalized: (0, _entify2.default)(data.prev, opt),
-      raw: data.prev
+      normalized: (0, _entify2.default)(prev, opt),
+      raw: prev
     }
   });
 };

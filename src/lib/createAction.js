@@ -10,7 +10,7 @@ const result = (fn, arg) => typeof fn === 'function' ? fn(arg) : fn
 app must have redux-thunk installed
 possible options:
 
-- requestId (optional)(string)
+- subset (optional)(string)
 - tail (default false)(boolean)
 - method (required)(get, post, put, delete, or patch)
 - params (object)
@@ -26,8 +26,8 @@ export default (defaults = {}) => (opt = {}) => {
   // merge our multitude of option objects together
   // defaults = options defined in createAction
   // opt = options specified in action creator
-  let options = mapValues(merge({}, opt, defaults), (v, k, o) =>
-    result(v, o.params)
+  const options = mapValues(merge({}, opt, defaults), (v, k, { params }) =>
+    result(v, params)
   )
 
   if (!options.method) throw new Error('Missing method')
