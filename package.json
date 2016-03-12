@@ -114,6 +114,7 @@
     "lodash.mapvalues": "^4.0.1",
     "lodash.merge": "^4.0.3",
     "normalizr": "^2.0.0",
+    "reduce-reducers": "^0.1.2",
     "redux-actions": "^0.9.1",
     "superagent": "^1.7.2",
     "url": "^0.11.0"

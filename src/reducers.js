@@ -1,82 +1,92 @@
 import { handleActions } from 'redux-actions'
 import { Map, List, fromJS } from 'immutable'
+import compose from 'reduce-reducers'
 
-const initialCollections = Map()
-const initialSubsets = Map()
+const initialState = Map({
+  subsets: Map(),
+  entities: Map()
+})
+
+// possible solutions:
+
 
 // shallow entity state
 const addEntities = (state, { payload: { normalized } }) => {
   if (!normalized) return state
-  return fromJS(normalized.entities).mergeDeep(state)
+  return fromJS({ entities: normalized.entities }).mergeDeep(state)
 }
 const updateEntities = (state, { payload: { normalized } }) => {
   if (!normalized) return state
-  return state.mergeDeep(fromJS(normalized.next.entities))
+  return state.mergeDeep(fromJS({ entities: normalized.next.entities }))
 }
 const deleteEntities = (state, { payload: { normalized } }) => {
   if (!normalized) return state
+  // TODO
   return state
 }
 
 // subset state
 const setResponse = (state, { meta: { subset }, payload: { raw } }) => {
   if (!subset) return state
-  const path = subset.split('.')
+  const path = [ 'subsets', subset ]
   return state.setIn(path, fromJS(raw))
 }
-const insertToResponse = (state, { meta: { subset }, payload: { raw } }) => {
+const insertToResponse = (state, { meta: { subset, collection }, payload: { raw } }) => {
   if (!subset) return state
-  const path = subset.split('.')
+  const path = [ 'subsets', subset ]
+  const newDoc = fromJS(raw)
   return state.updateIn(path, (v) => {
-    const newDoc = fromJS(raw)
-    if (!List.isList(v)) return newDoc
-    return v.push(newDoc)
+    // first event, initialize the value
+    if (v == null && collection) {
+      return List([ newDoc ])
+    }
+
+    // value exists, either push or replace
+    return List.isList(v) ? v.push(newDoc) : newDoc
   })
 }
-const updateResponse = (state, { meta: { subset }, payload: { raw } }) => {
+const updateResponse = (state, { meta: { subset, collection }, payload: { raw } }) => {
   if (!subset) return state
-  const path = subset.split('.')
+  const path = [ 'subsets', subset ]
+  const next = fromJS(raw.next)
+  const prevId = raw.prev.id
   return state.updateIn(path, (v) => {
-    const next = fromJS(raw.next)
-    if (!List.isList(v)) return next
+    // not a list item, replace with new value
+    if (!collection) {
+      return next
+    }
 
-    const prevId = raw.prev.id
+    // list item, find the index and do the update
     const idx = v.findIndex((i) => i.get('id') === prevId)
+    if (idx == null) return v // not our data?
     return v.set(idx, next)
   })
 }
-const deleteFromResponse = (state, { meta: { subset }, payload: { raw } }) => {
+const deleteFromResponse = (state, { meta: { subset, collection }, payload: { raw } }) => {
   if (!subset) return state
-  const path = subset.split('.')
-  if (!List.isList(state.getIn(path))) return state.removeIn(path)
-
+  const path = [ 'subsets', subset ]
+  const prevId = raw.id
+  // not a list, just wipe the val
+  if (!collection) {
+    return state.removeIn(path)
+  }
+  // item in a list, remove the specific item
   return state.updateIn(path, (v) => {
-    const prevId = raw.id
     const idx = v.findIndex((i) => i.get('id') === prevId)
     return v.delete(idx)
   })
 }
 
 const setResponseError = (state, { meta: { subset }, payload }) => {
-  if (subset) {
-    const path = subset.split('.')
-    return state.setIn([ ...path, 'error' ], payload)
-  }
-  return state
+  if (!subset) return state
+  return state.setIn([ 'subsets', subset, 'error' ], payload)
 }
 
 // exported actions
-export const collections = handleActions({
-  'tahoe.success': addEntities,
-  'tahoe.tail.insert': addEntities,
-  'tahoe.tail.update': updateEntities,
-  'tahoe.tail.delete': deleteEntities
-}, initialCollections)
-
-export const subsets = handleActions({
-  'tahoe.success': setResponse,
+export const api = handleActions({
+  'tahoe.success': compose(setResponse, addEntities),
   'tahoe.failure': setResponseError,
-  'tahoe.tail.insert': insertToResponse,
-  'tahoe.tail.update': updateResponse,
-  'tahoe.tail.delete': deleteFromResponse
-}, initialSubsets)
+  'tahoe.tail.insert': compose(insertToResponse, addEntities),
+  'tahoe.tail.update': compose(updateResponse, updateEntities),
+  'tahoe.tail.delete': compose(deleteFromResponse, deleteEntities)
+}, initialState)
