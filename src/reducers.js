@@ -1,82 +1,137 @@
 import { handleActions } from 'redux-actions'
-import { Map, List, fromJS } from 'immutable'
+import { Map, List, Set, fromJS } from 'immutable'
+import compose from 'reduce-reducers'
 
-const initialCollections = Map()
-const initialRequests = Map()
+const initialState = Map({
+  subsets: Map(),
+  entities: Map()
+})
+
+const ensureArray = (data) =>
+  Array.isArray(data) ? data : [ data ]
+
+// possible solutions:
+// - subsets become maps that are basically pointers to existing nodes in the entities store
+// - subsets become lists of IDs and entity types
 
 // shallow entity state
-const addEntities = (state, { payload }) => {
-  if (!payload.normalized) return state
-  return fromJS(payload.normalized.entities).mergeDeep(state)
+const addEntities = (state, { payload: { normalized } }) => {
+  if (!normalized) return state
+  return fromJS({ entities: normalized.entities }).mergeDeep(state)
 }
-const updateEntities = (state, { payload }) => {
-  if (!payload.normalized) return state
-  return state.mergeDeep(fromJS(payload.normalized.next.entities))
+const updateEntities = (state, { payload: { normalized } }) => {
+  if (!normalized) return state
+  // TODO: handle situation where id changed!
+  // TODO: nested relationships wonky here?
+  return state.mergeDeep(fromJS({ entities: normalized.next.entities }))
 }
-const deleteEntities = (state, { payload }) => {
-  if (!payload.normalized) return state
+const deleteEntities = (state, { payload: { normalized } }) => {
+  if (!normalized) return state
+  // TODO
   return state
 }
 
-// request state
-const setResponse = (state, { meta, payload }) => {
-  if (!meta.requestId) return state
-  let path = meta.requestId.split('.')
-  return state.setIn(path, fromJS(payload.raw))
-}
-const insertToResponse = (state, { meta, payload }) => {
-  if (!meta.requestId) return state
-  let path = meta.requestId.split('.')
-  return state.updateIn(path, (v) => {
-    let newDoc = fromJS(payload.raw)
-    if (!List.isList(v)) return newDoc
-    return v.push(newDoc)
+// subset state
+const createSubset = (state, { payload: { subset } }) => {
+  if (!subset) return state
+  const path = [ 'subsets', subset ]
+  const record = Map({
+    id: subset,
+    pending: true
   })
-}
-const updateResponse = (state, { meta, payload }) => {
-  if (!meta.requestId) return state
-  let path = meta.requestId.split('.')
-  return state.updateIn(path, (v) => {
-    let next = fromJS(payload.raw.next)
-    if (!List.isList(v)) return next
-
-    let prevId = payload.raw.prev.id
-    let idx = v.findIndex((i) => i.get('id') === prevId)
-    return v.set(idx, next)
-  })
-}
-const deleteFromResponse = (state, { meta, payload }) => {
-  if (!meta.requestId) return state
-  let path = meta.requestId.split('.')
-  if (!List.isList(state.getIn(path))) return state.removeIn(path)
-
-  return state.updateIn(path, (v) => {
-    let prevId = payload.raw.id
-    let idx = v.findIndex((i) => i.get('id') === prevId)
-    return v.delete(idx)
-  })
+  return state.setIn(path, record)
 }
 
-const setResponseError = (state, { meta, payload }) => {
-  if (meta.requestId) {
-    let path = meta.requestId.split('.')
-    return state.setIn(path, Map({ error: payload }))
+const setSubsetData = (state, { meta: { subset }, payload: { raw, normalized } }) => {
+  if (!subset) return state
+  const path = [ 'subsets', subset ]
+  if (!state.hasIn(path)) return state // subset doesnt exist
+  return state.updateIn(path, (subset) =>
+    subset
+      .set('data', fromJS(raw))
+      .set('entities', Set(ensureArray(normalized.result)))
+      .set('pending', false)
+      .set('error', null)
+  )
+}
+
+const setSubsetError = (state, { meta: { subset }, payload }) => {
+  if (!subset) return state
+  const path = [ 'subsets', subset ]
+  if (!state.hasIn(path)) return state // subset doesnt exist
+  return state.updateIn(path, (subset) =>
+    subset
+      .delete('data')
+      .delete('entities')
+      .set('error', payload)
+      .set('pending', false)
+  )
+}
+
+const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { raw, normalized } }) => {
+  if (!subset) return state
+  const path = [ 'subsets', subset ]
+  if (!state.hasIn(path)) return state // subset doesnt exist
+  const newData = fromJS(raw)
+  return state.updateIn(path, (subset) =>
+    subset
+      .set('pending', false)
+      .update('data', (data) => {
+        // first event, initialize the value
+        if (data == null && collection) return List([ newData ])
+        // value exists, either push or replace
+        return collection ? data.push(newData) : newData
+      })
+      .update('entities', (entityIds) => {
+        const arr = ensureArray(normalized.result)
+        if (entityIds == null) return Set(arr)
+        return entityIds.union(arr)
+      })
+  )
+}
+
+const updateSubsetDataItem = (state, { meta: { subset, collection }, payload: { raw } }) => {
+  if (!subset) return state
+  const path = [ 'subsets', subset ]
+  if (!state.hasIn(path)) return state // subset doesnt exist
+  const dataPath = [ ...path, 'data' ]
+  if (!state.hasIn(dataPath)) return state // subset has no data to update
+  const next = fromJS(raw.next)
+  return state.updateIn(dataPath, (data) => {
+    // not a list item, replace with new value
+    if (!collection) return next
+
+    // list item, find the index and do the update
+    const idx = data.findIndex((i) => i.get('id') === raw.prev.id)
+    if (idx == null) return data // not our data?
+    return data.set(idx, next)
+  })
+}
+const deleteSubsetDataItem = (state, { meta: { subset, collection }, payload: { raw } }) => {
+  if (!subset) return state
+  const path = [ 'subsets', subset ]
+  if (!state.hasIn(path)) return state // subset doesnt exist
+  const dataPath = [ ...path, 'data' ]
+  if (!state.hasIn(dataPath)) return state // subset has no data to update
+
+  // not a list, just wipe the val
+  if (!collection) {
+    return state.removeIn(dataPath)
   }
-  return state
+  // item in a list, remove the specific item
+  return state.updateIn(dataPath, (data) => {
+    const idx = data.findIndex((i) => i.get('id') === raw.id)
+    if (idx == null) return data // not our data?
+    return data.delete(idx)
+  })
 }
 
 // exported actions
-export const collections = handleActions({
-  'tahoe.success': addEntities,
-  'tahoe.tail.insert': addEntities,
-  'tahoe.tail.update': updateEntities,
-  'tahoe.tail.delete': deleteEntities
-}, initialCollections)
-
-export const requests = handleActions({
-  'tahoe.success': setResponse,
-  'tahoe.failure': setResponseError,
-  'tahoe.tail.insert': insertToResponse,
-  'tahoe.tail.update': updateResponse,
-  'tahoe.tail.delete': deleteFromResponse
-}, initialRequests)
+export const api = handleActions({
+  'tahoe.request': createSubset,
+  'tahoe.failure': setSubsetError,
+  'tahoe.success': compose(setSubsetData, addEntities),
+  'tahoe.tail.insert': compose(insertSubsetDataItem, addEntities),
+  'tahoe.tail.update': compose(updateSubsetDataItem, updateEntities),
+  'tahoe.tail.delete': compose(deleteSubsetDataItem, deleteEntities)
+}, initialState)

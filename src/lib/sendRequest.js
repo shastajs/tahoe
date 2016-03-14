@@ -12,22 +12,22 @@ export default (opt) => (dispatch) => {
     return createEventSource(opt, dispatch)
   }
 
-  let req = request[opt.method.toLowerCase()](opt.endpoint)
+  const req = request[opt.method.toLowerCase()](opt.endpoint)
 
   if (opt.headers) {
-    req = req.set(opt.headers)
+    req.set(opt.headers)
   }
   if (opt.query) {
-    req = req.query(opt.query)
+    req.query(opt.query)
   }
   if (opt.body) {
-    req = req.send(opt.body)
+    req.send(opt.body)
   }
   if (opt.withCredentials) {
-    req = req.withCredentials()
+    req.withCredentials()
   }
 
-  req.end((err, res) => {
+  req.end((err, { type, body }) => {
     if (err) {
       return dispatch({
         type: 'tahoe.failure',
@@ -37,13 +37,13 @@ export default (opt) => (dispatch) => {
     }
 
     // handle json responses
-    if (res.type === 'application/json') {
+    if (type === 'application/json') {
       return dispatch({
         type: 'tahoe.success',
         meta: opt,
         payload: {
-          raw: res.body,
-          normalized: entify(res.body, opt)
+          raw: body,
+          normalized: entify(body, opt)
         }
       })
     }
@@ -51,7 +51,7 @@ export default (opt) => (dispatch) => {
     dispatch({
       type: 'tahoe.failure',
       meta: opt,
-      payload: new Error('Unknown response type')
+      payload: new Error(`Unknown response type: ${type}`)
     })
   })
 }

@@ -13,37 +13,37 @@ const handleMessage = (opt, dispatch, fn) => ({ data }) => {
   }
 }
 
-const handleInsert = (data, opt, dispatch) =>
+const handleInsert = ({ next }, opt, dispatch) =>
   dispatch({
     type: 'tahoe.tail.insert',
     meta: opt,
     payload: {
-      normalized: entify(data.next, opt),
-      raw: data.next
+      normalized: entify(next, opt),
+      raw: next
     }
   })
-const handleUpdate = (data, opt, dispatch) =>
+const handleUpdate = ({ prev, next }, opt, dispatch) =>
   dispatch({
     type: 'tahoe.tail.update',
     meta: opt,
     payload: {
       normalized: {
-        prev: entify(data.prev, opt),
-        next: entify(data.next, opt)
+        prev: entify(prev, opt),
+        next: entify(next, opt)
       },
       raw: {
-        prev: data.prev,
-        next: data.next
+        prev: prev,
+        next: next
       }
     }
   })
-const handleDelete = (data, opt, dispatch) =>
+const handleDelete = ({ prev }, opt, dispatch) =>
   dispatch({
     type: 'tahoe.tail.delete',
     meta: opt,
     payload: {
-      normalized: entify(data.prev, opt),
-      raw: data.prev
+      normalized: entify(prev, opt),
+      raw: prev
     }
   })
 

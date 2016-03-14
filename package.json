@@ -49,7 +49,7 @@
     "babel": "^6.3.26",
     "babel-cli": "^6.4.0",
     "babel-core": "^6.4.0",
-    "babel-eslint": "^4.1.6",
+    "babel-eslint": "^5.0.0",
     "babel-loader": "^6.2.1",
     "babel-plugin-add-module-exports": "^0.1.2",
     "babel-plugin-transform-runtime": "^6.4.3",
@@ -59,11 +59,11 @@
     "babel-preset-stage-0": "^6.3.13",
     "babel-register": "^6.4.3",
     "babelify": "^7.2.0",
-    "eslint": "^1.10.3",
+    "eslint": "2.2.0",
     "eslint-cli": "^1.0.0",
     "eslint-config-rackt": "^1.1.1",
-    "eslint-plugin-react": "^3.15.0",
-    "gitbook-cli": "^1.0.1",
+    "eslint-plugin-react": "^4.2.1",
+    "gitbook-cli": "^2.0.0",
     "github-changes": "^1.0.1",
     "mocha": "^2.3.4",
     "mochify": "dylanfm/mochify.js",
@@ -84,13 +84,22 @@
   "eslintConfig": {
     "parser": "babel-eslint",
     "extends": "rackt",
+    "plugins": [
+      "react"
+    ],
     "env": {
       "browser": true,
       "node": true,
       "es6": true
     },
+    "globals": {
+      "__DEV__": true,
+      "__PROD__": true,
+      "__INITIAL_STATE__": true
+    },
     "ecmaFeatures": {
-      "modules": true
+      "modules": true,
+      "jsx": true
     },
     "rules": {
       "semi": [
@@ -105,6 +114,7 @@
     "lodash.mapvalues": "^4.0.1",
     "lodash.merge": "^4.0.3",
     "normalizr": "^2.0.0",
+    "reduce-reducers": "^0.1.2",
     "redux-actions": "^0.9.1",
     "superagent": "^1.7.2",
     "url": "^0.11.0"
