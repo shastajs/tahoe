@@ -51,7 +51,7 @@ export default (opt) => (dispatch) => {
     dispatch({
       type: 'tahoe.failure',
       meta: opt,
-      payload: new Error('Unknown response type')
+      payload: new Error(`Unknown response type: ${type}`)
     })
   })
 }

@@ -71,7 +71,7 @@ exports.default = function (opt) {
       dispatch({
         type: 'tahoe.failure',
         meta: opt,
-        payload: new Error('Unknown response type')
+        payload: new Error('Unknown response type: ' + type)
       });
     });
   };
