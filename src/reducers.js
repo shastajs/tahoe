@@ -84,7 +84,7 @@ const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { 
       })
       .update('entities', (entityIds) => {
         const arr = ensureArray(normalized.result)
-        if (entityIds == null) return List(arr)
+        if (entityIds == null) return Set(arr)
         return entityIds.union(arr)
       })
   )

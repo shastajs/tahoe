@@ -110,7 +110,7 @@ var insertSubsetDataItem = function insertSubsetDataItem(state, _ref7) {
       return collection ? data.push(newData) : newData;
     }).update('entities', function (entityIds) {
       var arr = ensureArray(normalized.result);
-      if (entityIds == null) return (0, _immutable.List)(arr);
+      if (entityIds == null) return (0, _immutable.Set)(arr);
       return entityIds.union(arr);
     });
   });
