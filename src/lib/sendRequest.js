@@ -13,7 +13,7 @@ export default (opt) => (dispatch) => {
   }
 
   const req = request[opt.method.toLowerCase()](opt.endpoint)
-
+  const debug = `${opt.method.toUpperCase()} ${opt.endpoint}`
   if (opt.headers) {
     req.set(opt.headers)
   }
@@ -27,7 +27,7 @@ export default (opt) => (dispatch) => {
     req.withCredentials()
   }
 
-  req.end((err, { type, body }) => {
+  req.end((err, res) => {
     if (err) {
       return dispatch({
         type: 'tahoe.failure',
@@ -36,14 +36,22 @@ export default (opt) => (dispatch) => {
       })
     }
 
+    if (!res) {
+      return dispatch({
+        type: 'tahoe.failure',
+        meta: opt,
+        payload: new Error(`Connection failed: ${debug}`)
+      })
+    }
+
     // handle json responses
-    if (type === 'application/json') {
+    if (res.type === 'application/json') {
       return dispatch({
         type: 'tahoe.success',
         meta: opt,
         payload: {
-          raw: body,
-          normalized: entify(body, opt)
+          raw: res.body,
+          normalized: entify(res.body, opt)
         }
       })
     }
@@ -51,7 +59,7 @@ export default (opt) => (dispatch) => {
     dispatch({
       type: 'tahoe.failure',
       meta: opt,
-      payload: new Error(`Unknown response type: ${type}`)
+      payload: new Error(`Unknown response type: '${res.type}' from ${debug}`)
     })
   })
 }

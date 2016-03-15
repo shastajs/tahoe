@@ -62,8 +62,8 @@ const setSubsetError = (state, { meta: { subset }, payload }) => {
   if (!state.hasIn(path)) return state // subset doesnt exist
   return state.updateIn(path, (subset) =>
     subset
-      // .delete('data')
-      // .delete('entities')
+      .delete('data')
+      .delete('entities')
       .set('error', payload)
       .set('pending', false)
   )

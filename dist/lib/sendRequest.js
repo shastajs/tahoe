@@ -30,7 +30,7 @@ exports.default = function (opt) {
     }
 
     var req = _superagent2.default[opt.method.toLowerCase()](opt.endpoint);
-
+    var debug = opt.method.toUpperCase() + ' ' + opt.endpoint;
     if (opt.headers) {
       req.set(opt.headers);
     }
@@ -44,10 +44,7 @@ exports.default = function (opt) {
       req.withCredentials();
     }
 
-    req.end(function (err, _ref) {
-      var type = _ref.type;
-      var body = _ref.body;
-
+    req.end(function (err, res) {
       if (err) {
         return dispatch({
           type: 'tahoe.failure',
@@ -56,14 +53,22 @@ exports.default = function (opt) {
         });
       }
 
+      if (!res) {
+        return dispatch({
+          type: 'tahoe.failure',
+          meta: opt,
+          payload: new Error('Connection failed: ' + debug)
+        });
+      }
+
       // handle json responses
-      if (type === 'application/json') {
+      if (res.type === 'application/json') {
         return dispatch({
           type: 'tahoe.success',
           meta: opt,
           payload: {
-            raw: body,
-            normalized: (0, _entify2.default)(body, opt)
+            raw: res.body,
+            normalized: (0, _entify2.default)(res.body, opt)
           }
         });
       }
@@ -71,7 +76,7 @@ exports.default = function (opt) {
       dispatch({
         type: 'tahoe.failure',
         meta: opt,
-        payload: new Error('Unknown response type: ' + type)
+        payload: new Error('Unknown response type: \'' + res.type + '\' from ' + debug)
       });
     });
   };
