@@ -57,6 +57,7 @@ var createSubset = function createSubset(state, _ref4) {
 
   if (!subset) return state;
   var path = ['subsets', subset];
+  if (state.hasIn(path)) return state;
   var record = (0, _immutable.Map)({
     id: subset,
     pending: true
