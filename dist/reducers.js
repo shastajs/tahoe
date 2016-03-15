@@ -87,7 +87,10 @@ var setSubsetError = function setSubsetError(state, _ref6) {
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.delete('data').delete('entities').set('error', payload).set('pending', false);
+    return subset
+    // .delete('data')
+    // .delete('entities')
+    .set('error', payload).set('pending', false);
   });
 };
 
