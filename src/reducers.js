@@ -35,6 +35,7 @@ const deleteEntities = (state, { payload: { normalized } }) => {
 const createSubset = (state, { payload: { subset } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
+  if (state.hasIn(path)) return state // already exists
   const record = Map({
     id: subset,
     pending: true
