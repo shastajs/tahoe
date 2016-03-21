@@ -32,7 +32,7 @@ exports.default = function (opt) {
     var req = _superagent2.default[opt.method.toLowerCase()](opt.endpoint);
     var debug = opt.method.toUpperCase() + ' ' + opt.endpoint;
     if (opt.headers) {
-      req.set(opt.headers);
+      req.set(typeof opt.headers === 'function' ? opt.headers() : opt.headers);
     }
     if (opt.query) {
       req.query(opt.query);

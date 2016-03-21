@@ -15,7 +15,7 @@ export default (opt) => (dispatch) => {
   const req = request[opt.method.toLowerCase()](opt.endpoint)
   const debug = `${opt.method.toUpperCase()} ${opt.endpoint}`
   if (opt.headers) {
-    req.set(opt.headers)
+    req.set(typeof opt.headers === 'function' ? opt.headers() : opt.headers)
   }
   if (opt.query) {
     req.query(opt.query)
