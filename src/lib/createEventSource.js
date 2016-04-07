@@ -18,7 +18,7 @@ const handleInsert = ({ next }, opt, dispatch) =>
     type: 'tahoe.tail.insert',
     meta: opt,
     payload: {
-      normalized: entify(next, opt),
+      normalized: opt.model ? entify(next, opt) : null,
       raw: next
     }
   })
@@ -27,10 +27,10 @@ const handleUpdate = ({ prev, next }, opt, dispatch) =>
     type: 'tahoe.tail.update',
     meta: opt,
     payload: {
-      normalized: {
+      normalized: opt.model ? {
         prev: entify(prev, opt),
         next: entify(next, opt)
-      },
+      } : null,
       raw: {
         prev: prev,
         next: next
@@ -42,7 +42,7 @@ const handleDelete = ({ prev }, opt, dispatch) =>
     type: 'tahoe.tail.delete',
     meta: opt,
     payload: {
-      normalized: entify(prev, opt),
+      normalized: opt.model ? entify(prev, opt) : null,
       raw: prev
     }
   })

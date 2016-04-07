@@ -68,7 +68,7 @@ exports.default = function (opt) {
           meta: opt,
           payload: {
             raw: res.body,
-            normalized: (0, _entify2.default)(res.body, opt)
+            normalized: opt.model ? (0, _entify2.default)(res.body, opt) : null
           }
         });
       }

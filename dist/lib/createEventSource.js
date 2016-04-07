@@ -40,7 +40,7 @@ var handleInsert = function handleInsert(_ref2, opt, dispatch) {
     type: 'tahoe.tail.insert',
     meta: opt,
     payload: {
-      normalized: (0, _entify2.default)(next, opt),
+      normalized: opt.model ? (0, _entify2.default)(next, opt) : null,
       raw: next
     }
   });
@@ -52,10 +52,10 @@ var handleUpdate = function handleUpdate(_ref3, opt, dispatch) {
     type: 'tahoe.tail.update',
     meta: opt,
     payload: {
-      normalized: {
+      normalized: opt.model ? {
         prev: (0, _entify2.default)(prev, opt),
         next: (0, _entify2.default)(next, opt)
-      },
+      } : null,
       raw: {
         prev: prev,
         next: next
@@ -69,7 +69,7 @@ var handleDelete = function handleDelete(_ref4, opt, dispatch) {
     type: 'tahoe.tail.delete',
     meta: opt,
     payload: {
-      normalized: (0, _entify2.default)(prev, opt),
+      normalized: opt.model ? (0, _entify2.default)(prev, opt) : null,
       raw: prev
     }
   });

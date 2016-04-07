@@ -51,7 +51,7 @@ export default (opt) => (dispatch) => {
         meta: opt,
         payload: {
           raw: res.body,
-          normalized: entify(res.body, opt)
+          normalized: opt.model ? entify(res.body, opt) : null
         }
       })
     }
