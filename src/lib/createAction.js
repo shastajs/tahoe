@@ -2,6 +2,10 @@ import mapValues from 'lodash.mapvalues'
 import merge from 'lodash.merge'
 import sendRequest from './sendRequest'
 
+const reserved = [
+  'onResponse',
+  'onError'
+]
 const result = (fn, arg) => typeof fn === 'function' ? fn(arg) : fn
 
 // TODO:0 check entities cache in store and dont fetch if we have it already
@@ -26,9 +30,10 @@ export default (defaults = {}) => (opt = {}) => {
   // merge our multitude of option objects together
   // defaults = options defined in createAction
   // opt = options specified in action creator
-  const options = mapValues(merge({}, opt, defaults), (v, k, { params }) =>
-    result(v, params)
-  )
+  const options = mapValues(merge({}, opt, defaults), (v, k, { params }) => {
+    if (reserved.indexOf(k) !== -1) return v
+    return result(v, params)
+  })
 
   if (!options.method) throw new Error('Missing method')
   if (!options.endpoint) throw new Error('Missing endpoint')

@@ -18,6 +18,7 @@ var _sendRequest2 = _interopRequireDefault(_sendRequest);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var reserved = ['onResponse', 'onError'];
 var result = function result(fn, arg) {
   return typeof fn === 'function' ? fn(arg) : fn;
 };
@@ -50,6 +51,8 @@ exports.default = function () {
     // opt = options specified in action creator
     var options = (0, _lodash2.default)((0, _lodash4.default)({}, opt, defaults), function (v, k, _ref) {
       var params = _ref.params;
+
+      if (reserved.indexOf(k) !== -1) return v;
       return result(v, params);
     });
 
