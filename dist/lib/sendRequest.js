@@ -45,7 +45,14 @@ exports.default = function (opt) {
     }
 
     req.end(function (err, res) {
+      if (!res && !err) {
+        err = new Error('Connection failed: ' + debug);
+      }
+      if (!err && res.type !== 'application/json') {
+        err = new Error('Unknown response type: \'' + res.type + '\' from ' + debug);
+      }
       if (err) {
+        if (opt.onError) opt.onError(err);
         return dispatch({
           type: 'tahoe.failure',
           meta: opt,
@@ -53,30 +60,15 @@ exports.default = function (opt) {
         });
       }
 
-      if (!res) {
-        return dispatch({
-          type: 'tahoe.failure',
-          meta: opt,
-          payload: new Error('Connection failed: ' + debug)
-        });
-      }
-
       // handle json responses
-      if (res.type === 'application/json') {
-        return dispatch({
-          type: 'tahoe.success',
-          meta: opt,
-          payload: {
-            raw: res.body,
-            normalized: opt.model ? (0, _entify2.default)(res.body, opt) : null
-          }
-        });
-      }
-
+      if (opt.onResponse) opt.onResponse(res);
       dispatch({
-        type: 'tahoe.failure',
+        type: 'tahoe.success',
         meta: opt,
-        payload: new Error('Unknown response type: \'' + res.type + '\' from ' + debug)
+        payload: {
+          raw: res.body,
+          normalized: opt.model ? (0, _entify2.default)(res.body, opt) : null
+        }
       });
     });
   };
