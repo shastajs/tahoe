@@ -50,7 +50,9 @@ const setSubsetData = (state, { meta: { subset }, payload: { raw, normalized } }
   return state.updateIn(path, (subset) =>
     subset
       .set('data', fromJS(raw))
-      .set('entities', Set(ensureArray(normalized.result)))
+      .set('entities', normalized
+        ? Set(ensureArray(normalized.result))
+        : Set())
       .set('pending', false)
       .set('error', null)
   )
@@ -84,6 +86,7 @@ const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { 
         return collection ? data.push(newData) : newData
       })
       .update('entities', (entityIds) => {
+        if (!normalized) return entityIds
         const arr = ensureArray(normalized.result)
         if (entityIds == null) return Set(arr)
         return entityIds.union(arr)

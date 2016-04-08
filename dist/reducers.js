@@ -75,7 +75,7 @@ var setSubsetData = function setSubsetData(state, _ref5) {
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.set('data', (0, _immutable.fromJS)(raw)).set('entities', (0, _immutable.Set)(ensureArray(normalized.result))).set('pending', false).set('error', null);
+    return subset.set('data', (0, _immutable.fromJS)(raw)).set('entities', normalized ? (0, _immutable.Set)(ensureArray(normalized.result)) : (0, _immutable.Set)()).set('pending', false).set('error', null);
   });
 };
 
@@ -110,6 +110,7 @@ var insertSubsetDataItem = function insertSubsetDataItem(state, _ref7) {
       // value exists, either push or replace
       return collection ? data.push(newData) : newData;
     }).update('entities', function (entityIds) {
+      if (!normalized) return entityIds;
       var arr = ensureArray(normalized.result);
       if (entityIds == null) return (0, _immutable.Set)(arr);
       return entityIds.union(arr);
