@@ -26,17 +26,26 @@ all options can either be a value, or a function that returns a value.
 if you define a function, it will receive options.params as an argument
 */
 
-export default (defaults = {}) => (opt = {}) => {
-  // merge our multitude of option objects together
-  // defaults = options defined in createAction
-  // opt = options specified in action creator
-  const options = mapValues(merge({}, opt, defaults), (v, k, { params }) => {
-    if (reserved.indexOf(k) !== -1) return v
+// merge our multitude of option objects together
+// defaults = options defined in createAction
+// opt = options specified in action creator
+const isReserved = (k) => reserved.indexOf(k) !== -1
+
+export const mergeOptions = (defaults, opt) => {
+  return mapValues(merge({}, opt, defaults), (v, k, { params }) => {
+    if (isReserved(k)) return v
     return result(v, params)
   })
+}
 
+// handle errors and pass the options into a callback
+export const handleOptions = (options, onSuccess) => {
   if (!options.method) throw new Error('Missing method')
   if (!options.endpoint) throw new Error('Missing endpoint')
+  return onSuccess(options)
+}
 
-  return sendRequest(options)
+export default (defaults = {}) => (opt = {}) => {
+  const options = mergeOptions(defaults, opt)
+  return handleOptions(options, sendRequest)
 }
