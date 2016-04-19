@@ -1,5 +1,6 @@
 import url from 'url'
 import entify from './entify'
+import eventHandlers from './eventHandlers.js'
 
 const handleMessage = (opt, dispatch, fn) => ({ data }) => {
   try {
