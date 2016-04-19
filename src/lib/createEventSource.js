@@ -57,6 +57,7 @@ const combineUrl = (endpoint, query) => {
   }
   return url.format(ay)
 }
+
 export default (opt, dispatch) => {
   const finalUrl = combineUrl(opt.endpoint, opt.query)
   const src = new EventSource(finalUrl, { withCredentials: opt.withCredentials })
