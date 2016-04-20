@@ -5,7 +5,7 @@ import should from 'should'
 import createEventSource, { handleMessage, dispatchMessageType, getPayload }  from '../src/lib/createEventSource'
 import sinon from 'sinon'
 
-describe.only('createEventSource', () => {
+describe('createEventSource', () => {
   describe('the default function', () => {
     const opt = {
       endpoint: '/test',
