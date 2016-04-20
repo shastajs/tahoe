@@ -38,19 +38,30 @@ describe('createEventSource', () => {
     const opt = { test: 1 }
     let dispatchStub = null
     beforeEach(() => {
-      dispatchStub = sinon.stub()
+      dispatchStub = sinon.stub();
     })
     it('should dispatch any JSON parsing errors', (done) => {
       const badResponse = {
         data: '{'
       }
       handleMessage(opt, dispatchStub, 'insert')(badResponse)
-      should(dispatchStub.calledWith({
-        type: 'tahoe.failure',
-        meta: opt,
-        payload: new Error('SyntaxError: Unexpected token u')
-      })).equal(true)
+      let passedIntoDispatch = dispatchStub.firstCall.args
+      const payload = passedIntoDispatch[0].payload
+      delete passedIntoDispatch[0]['payload']
+      should(passedIntoDispatch).deepEqual([ 
+        {
+          type: 'tahoe.failure',
+          meta: opt
+        } 
+      ])
+      should(payload instanceof Error).equal(true)
       done()
+
+      // should(dispatchStub.calledWith({
+
+      //   payload: new Error("JSON Parse error: Expected '}'")
+      // })).equal(true)
+      // done()
     })
   }) 
   describe('the dispatchMessageType helper', () => {
