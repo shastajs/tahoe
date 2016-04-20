@@ -68,7 +68,8 @@
     "mocha": "^2.3.4",
     "mochify": "dylanfm/mochify.js",
     "rimraf": "^2.5.0",
-    "should": "^8.0.0"
+    "should": "^8.0.0",
+    "sinon": "^1.17.3"
   },
   "babel": {
     "presets": [
