@@ -56,12 +56,6 @@ describe('createEventSource', () => {
       ])
       should(payload instanceof Error).equal(true)
       done()
-
-      // should(dispatchStub.calledWith({
-
-      //   payload: new Error("JSON Parse error: Expected '}'")
-      // })).equal(true)
-      // done()
     })
   }) 
   describe('the dispatchMessageType helper', () => {
