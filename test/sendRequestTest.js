@@ -1,6 +1,4 @@
 /*global it: true, describe: true, beforeEach: true */
-/*eslint no-console: 0*/
-
 import { fromJS } from 'immutable'
 import should from 'should'
 import request from 'superagent'
@@ -239,7 +237,7 @@ describe('sendRequest', () => {
         const beforeEndStub = sinon.stub()
         getRequestStub.returns(requestStub)
         handleStandardRequest(opt, dispatchStub, beforeEndStub)
-        // should pass the point into the right request function
+        // should pass the endpoint into the right request function
         should(getRequestStub.args[0]).deepEqual([
           '/test'
         ])
