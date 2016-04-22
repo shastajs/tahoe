@@ -1,4 +1,6 @@
 /*global it: true, describe: true, beforeEach: true */
+/*eslint no-console: 0*/
+
 import { fromJS } from 'immutable'
 import should from 'should'
 import request from 'superagent'
