@@ -2,18 +2,7 @@ import request from 'superagent'
 import entify from './entify'
 import createEventSource from './createEventSource'
 
-export default (opt) => (dispatch) => {
-  dispatch({
-    type: 'tahoe.request',
-    payload: opt
-  })
-
-  if (opt.tail) {
-    return createEventSource(opt, dispatch)
-  }
-
-  const req = request[opt.method.toLowerCase()](opt.endpoint)
-  const debug = `${opt.method.toUpperCase()} ${opt.endpoint}`
+export const prepareRequest = (opt, req) => {
   if (opt.headers) {
     req.set(opt.headers)
   }
@@ -26,6 +15,22 @@ export default (opt) => (dispatch) => {
   if (opt.withCredentials) {
     req.withCredentials()
   }
+}
+
+export default (opt) => (dispatch) => {
+  dispatch({
+    type: 'tahoe.request',
+    payload: opt
+  })
+
+  if (opt.tail) {
+    return createEventSource(opt, dispatch)
+  }
+
+  const req = request[opt.method.toLowerCase()](opt.endpoint)
+  const debug = `${opt.method.toUpperCase()} ${opt.endpoint}`
+
+  prepareRequest(opt, req)
 
   req.end((err, res) => {
     if (!res && !err) {
