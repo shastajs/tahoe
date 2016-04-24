@@ -3,7 +3,18 @@ import request from 'superagent'
 import entify from './entify'
 import createEventSource from './createEventSource'
 
-export default (opt) => (dispatch) => handleRequest(opt, dispatch, createEventSource, handleStandardRequest)
+export default (opt) => (dispatch) => {
+  const params = {
+    opt,
+    dispatch
+  }
+  const handlers = {
+    onTail: createEventSource,
+    onStandard: handleStandardRequest
+  }
+  return handleRequest(params, handlers)
+}
+
 
 export const prepareRequest = (opt, req) => {
   if (opt.headers) {
@@ -20,15 +31,19 @@ export const prepareRequest = (opt, req) => {
   }
 }
 
-export const handleRequest = (opt, dispatch, onTail, onStandard) => {
+export const handleRequest = (params, { onTail, onStandard }) => {
+  const { opt, dispatch } = params
   dispatch({
     type: 'tahoe.request',
     payload: opt
   })
-  opt.tail ? onTail(opt, dispatch) : onStandard(opt, dispatch, prepareRequest)
+  const handlers = {
+    beforeEnd: prepareRequest
+  }
+  opt.tail ? onTail(params) : onStandard(params, handlers)
 }
 
-export const handleSuccess = (res, opt, dispatch, getEntities) => {
+export const handleSuccess = ({ res, opt, dispatch }, { getEntities }) => {
   if (opt.onResponse) opt.onResponse(res)
   dispatch({
     type: 'tahoe.success',
@@ -40,7 +55,7 @@ export const handleSuccess = (res, opt, dispatch, getEntities) => {
   })
 }
 
-export const handleError = (err, opt, dispatch) => {
+export const handleError = ({ err, opt, dispatch }) => {
   if (opt.onError) opt.onError(err)
   return dispatch({
     type: 'tahoe.failure',
@@ -49,13 +64,29 @@ export const handleError = (err, opt, dispatch) => {
   })
 }
 
-export const handleStandardRequest = (opt, dispatch, beforeEnd) => {
+export const handleStandardRequest = (params, { beforeEnd }) => {
+  const { opt } = params
   const req = request[opt.method.toLowerCase()](opt.endpoint)
   beforeEnd(opt, req)
-  req.end((err, res) => handleResponse(err, res, opt, dispatch, handleError, handleSuccess))
+  req.end((err, res) => {
+    const newParams = {
+      err,
+      res,
+      ...params
+    }
+    const handlers = {
+      onError: handleError,
+      onSuccess: handleSuccess
+    }
+    return handleResponse(newParams, handlers)
+  })
 }
 
-export const handleResponse = (err, res, opt, dispatch, onError, onSuccess) => {
+export const handleResponse = (params, { onError, onSuccess }) => {
+  let { err, res, opt } = params
+  const handlers = {
+    getEntities: entify
+  }
   const debug = `${opt.method.toUpperCase()} ${opt.endpoint}`
   if (!res && !err) {
     err = new Error(`Connection failed: ${debug}`)
@@ -63,5 +94,5 @@ export const handleResponse = (err, res, opt, dispatch, onError, onSuccess) => {
   if (!err && res.type !== 'application/json') {
     err = new Error(`Unknown response type: '${res.type}' from ${debug}`)
   }
-  return err ? onError(err, opt, dispatch) : onSuccess(res, opt, dispatch, entify)
+  return err ? onError(params) : onSuccess(params, handlers)
 }
