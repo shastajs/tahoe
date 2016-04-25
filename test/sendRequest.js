@@ -160,7 +160,7 @@ describe('sendRequest', () => {
           ...params
         }
       })
-      it('should call onResponse from opt and dispatch a success action', (done) => {
+      it.only('should call onResponse from opt and dispatch a success action', (done) => {
         const { opt, res, dispatch } = updatedParams
         const { onResponse } = opt
         handleSuccess(updatedParams, handlers)
