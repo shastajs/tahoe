@@ -1,11 +1,9 @@
 import url from 'url'
 import entify from './entify'
-import eventHandlers from './eventHandlers.js'
 
-
-export const handleMessage = (opt, dispatch, messageType) => ({ data }) => {
+const handleMessage = (opt, dispatch, fn) => ({ data }) => {
   try {
-    dispatchMessageType(JSON.parse(data), opt, dispatch, entify, messageType)
+    fn(JSON.parse(data), opt, dispatch)
   } catch (err) {
     dispatch({
       type: 'tahoe.failure',
@@ -15,20 +13,38 @@ export const handleMessage = (opt, dispatch, messageType) => ({ data }) => {
   }
 }
 
-export const getPayload = ({ prev, next }, opt, getEntities, messageType) => {
-  const normalized = opt.model ? eventHandlers[messageType].normalized(getEntities, prev, next, opt) : null
-  const raw = eventHandlers[messageType].raw(prev, next)
-  return {
-    normalized,
-    raw
-  }
-}
-
-export const dispatchMessageType = (data, opt, dispatch, getEntities, messageType) => 
+const handleInsert = ({ next }, opt, dispatch) =>
   dispatch({
-    type: `tahoe.tail.${messageType}`,
+    type: 'tahoe.tail.insert',
     meta: opt,
-    payload : getPayload(data, opt, getEntities, messageType)
+    payload: {
+      normalized: opt.model ? entify(next, opt) : null,
+      raw: next
+    }
+  })
+const handleUpdate = ({ prev, next }, opt, dispatch) =>
+  dispatch({
+    type: 'tahoe.tail.update',
+    meta: opt,
+    payload: {
+      normalized: opt.model ? {
+        prev: entify(prev, opt),
+        next: entify(next, opt)
+      } : null,
+      raw: {
+        prev: prev,
+        next: next
+      }
+    }
+  })
+const handleDelete = ({ prev }, opt, dispatch) =>
+  dispatch({
+    type: 'tahoe.tail.delete',
+    meta: opt,
+    payload: {
+      normalized: opt.model ? entify(prev, opt) : null,
+      raw: prev
+    }
   })
 
 const combineUrl = (endpoint, query) => {
@@ -40,17 +56,10 @@ const combineUrl = (endpoint, query) => {
   }
   return url.format(ay)
 }
-
-const addListeners = (src, opt, dispatch) => {
-  Object.keys(eventHandlers).forEach(
-    messageType => src.addEventListener(messageType, handleMessage(opt, dispatch, messageType))
-  )
-}
-
 export default (opt, dispatch) => {
   const finalUrl = combineUrl(opt.endpoint, opt.query)
   const src = new EventSource(finalUrl, { withCredentials: opt.withCredentials })
-  addListeners(src, opt, dispatch)
+  src.addEventListener('insert', handleMessage(opt, dispatch, handleInsert))
+  src.addEventListener('update', handleMessage(opt, dispatch, handleUpdate))
+  src.addEventListener('delete', handleMessage(opt, dispatch, handleDelete))
 }
-
-
