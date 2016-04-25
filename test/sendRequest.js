@@ -34,16 +34,16 @@ describe('sendRequest', () => {
     })
 
     it('should call the right methods on the request using options', (done) => {
-      const opt = {
+      const options = {
         headers : { header: true },
         query: { query: true },
         body: { body: true },
         withCredentials: true
       }
-      prepareRequest(opt, req)
-      should(req.set.args[0][0]).deepEqual(opt.headers)
-      should(req.query.args[0][0]).deepEqual(opt.query)
-      should(req.send.args[0][0]).deepEqual(opt.body)
+      prepareRequest(options, req)
+      should(req.set.args[0][0]).deepEqual(options.headers)
+      should(req.query.args[0][0]).deepEqual(options.query)
+      should(req.send.args[0][0]).deepEqual(options.body)
       should(req.withCredentials.calledOnce).equal(true)
       done()
     })
@@ -58,136 +58,135 @@ describe('sendRequest', () => {
   })
   describe('the handleResponse helper', () => {
     
-    const params = {
-      opt: {
-        method: 'get',
-        endpoint: '/test'
-      },
-      dispatch: () => {}
-    }
-    let handlers = {
-      onError: null,
-      onSuccess: null
-    }
+    let params = null
+    const getExpectedParams = (paramsToUpdate) => paramsToUpdate.withMutations((newParams) => {
+      newParams.set('getEntities', entify)
+      newParams.delete('response')
+      newParams.delete('onError')
+      newParams.delete('onSuccess')
+    }).toJS()
+
+    const getUpdatedParams = (error, response) => params.mergeDeep(fromJS({
+      error,
+      response
+    })).toJS()
+
     beforeEach(() => {
-      handlers.onSuccess = sinon.stub()
-      handlers.onError = sinon.stub()
+      params = fromJS({
+        options: {
+          method: 'get',
+          endpoint: '/test'
+        },
+        dispatch: () => {},
+        onError: sinon.stub(),
+        onSuccess: sinon.stub()
+      })
     })
 
     it('should call the error callback if an error is received', (done) => {
-      const updatedParams = {
-        err: new Error('Message'),
-        res: null,
-        ...params
-      }
-      handleResponse(updatedParams, handlers)
-      should(handlers.onSuccess.called).equal(false)
-      should(handlers.onError.args[0][0]).deepEqual(updatedParams)
+      const error = new Error('Message')
+      const response = null
+      params = getUpdatedParams(error, response)
+      const expectedParams = getExpectedParams(fromJS(params))
+      handleResponse(params)
+      const { onSuccess, onError } = params
+      should(onSuccess.called).equal(false)
+      should(onError.args[0][0]).deepEqual(expectedParams)
       done()
     })
     it('should call the success callback if there are no errors', (done) => {
-      const updatedParams = {
-        err: null,
-        res: {
-          body: { test: 1 },
-          type: 'application/json'
-        },
-        ...params
+      const error = null
+      const response = {
+        body: { test: 1 },
+        type: 'application/json'
       }
-      handleResponse(updatedParams, handlers)
-      should(handlers.onError.called).equal(false)
-      should(handlers.onSuccess.args[0]).deepEqual([
-        updatedParams,
-        { getEntities: entify }
-      ])
+      params = getUpdatedParams(error, response)
+      const expectedParams = getExpectedParams(fromJS(params))
+      handleResponse(params)
+      const { onSuccess, onError } = params
+      should(onError.called).equal(false)
+      should(onSuccess.args[0][0]).deepEqual(expectedParams)
       done()
     })
     it('Should generate an error for non json responses', (done) => {
-      const updatedParams = {
-        err: null,
-        res: {
-          body: { test: 1 },
-          type: 'html'
-        },
-        ...params
+      const error = null
+      const updatedError = new Error("Unknown response type: 'html' from GET /test")
+      const response = {
+        body: { test: 1 },
+        type: 'html'
       }
-      handleResponse(updatedParams, handlers)
-      should(handlers.onSuccess.called).equal(false)
-      should(handlers.onError.args[0][0]).deepEqual({
-        err: new Error("Unknown response type: 'html' from GET /test"),
-        ...updatedParams
-      })
+      params = getUpdatedParams(error, response)
+      const expectedParams = getExpectedParams(fromJS(params).set('error', updatedError))
+      handleResponse(params)
+      const { onSuccess, onError } = params
+      should(onSuccess.called).equal(false)
+      should(onError.args[0][0]).deepEqual(expectedParams)
       done()
     })
     it('should generate an error failed connections', (done) => {
-      const updatedParams = {
-        err: null,
-        res: null,
-        ...params
-      }
-      handleResponse(updatedParams, handlers)
-      should(handlers.onSuccess.called).equal(false)
-      should(handlers.onError.args[0][0]).deepEqual({
-        err: new Error('Connection failed: GET /test'),
-        ...updatedParams
-      })
+      const error = null
+      const updatedError = new Error('Connection failed: GET /test')
+      const response = null
+      params = getUpdatedParams(error, response)
+      const expectedParams = getExpectedParams(fromJS(params).set('error', updatedError))
+      handleResponse(params)
+      const { onSuccess, onError } = params
+      should(onSuccess.called).equal(false)
+      should(onError.args[0][0]).deepEqual(expectedParams)
       done()
     })
   })
   describe('the response/request handlers', () => {
-    let params = {
-      dispatch: null
-    }
+    let params = null
     beforeEach(() => {
-      params.dispatch = sinon.stub()
+      params = fromJS({
+        dispatch: sinon.stub()
+      })
     })
     describe('the handleSuccess helper', () => {
-      const handlers = {
-        getEntities: (body) => ({ entities: body })
-      }
-      let updatedParams = null
       beforeEach(() => {
-        updatedParams = {
-          res: {
+        params = params.mergeDeep(fromJS({
+          response: {
             body: {
               test: 1
             }
           },
-          opt: {
+          options: {
             model: {},
             onResponse: sinon.stub()
           },
-          ...params
-        }
+          getEntities: (body) => ({ entities: body })
+        })).toJS()
       })
-      it.only('should call onResponse from opt and dispatch a success action', (done) => {
-        const { opt, res, dispatch } = updatedParams
-        const { onResponse } = opt
-        handleSuccess(updatedParams, handlers)
+      it('should call onResponse from options and dispatch a success action', (done) => {
+        const { options, response, dispatch } = params
+        const { onResponse } = options
+        
+        handleSuccess(params)
         // the corrent action is dispatched
         should(dispatch.args[0][0]).deepEqual({
           type: 'tahoe.success',
-          meta: opt,
+          meta: options,
           payload: {
-            raw: res.body,
+            raw: response.body,
             normalized: { entities: { test: 1 } }
           }
         })
 
         // the onResponse callback is called and the response is passed in
-        should(onResponse.args[0][0]).deepEqual(res)
+        should(onResponse.args[0][0]).deepEqual(response)
         done()
       })
       it('should return null for normalized payload if no model is provided', (done) => {
-        const { dispatch } = updatedParams
-        const paramsWithoutModel = fromJS(updatedParams).deleteIn([ 'opt', 'model' ]).toJS()
-        const { opt, res } = paramsWithoutModel
-        handleSuccess(paramsWithoutModel, handlers)
+        params = fromJS(params).deleteIn([ 'options', 'model' ]).toJS()
+        const { options, response } = params
+        const { dispatch } = params
+        handleSuccess(params)
         should(dispatch.args[0][0]).deepEqual({
           type: 'tahoe.success',
-          meta: opt,
+          meta: options,
           payload: {
-            raw: res.body,
+            raw: response.body,
             normalized: null
           }
         })
@@ -195,89 +194,97 @@ describe('sendRequest', () => {
       })
     })
     describe('the handleError helper', () => {
-      it('should call onError in opt and dispatch an error action', (done) => {
-        const err = new Error('test')
-        const opt = {
+      it('should call onError in options and dispatch an error action', (done) => {
+        const error = new Error('test')
+        const options = {
           onError: sinon.stub()
         }
-        const updatedParams = {
-          err,
-          opt,
-          ...params
-        }
-        handleError(updatedParams)
-        should(updatedParams.dispatch.args[0][0]).deepEqual({
+        params = params.mergeDeep(fromJS({
+          error,
+          options
+        })).toJS()
+
+        handleError(params)
+        should(params.dispatch.args[0][0]).deepEqual({
           type: 'tahoe.failure',
-          meta: opt,
-          payload: err
+          meta: options,
+          payload: error
         })
-        should(opt.onError.args[0][0]).deepEqual(err)
+        should(options.onError.args[0][0]).deepEqual(error)
         done()
       })
     })
     describe('the handleRequest helper',  () => {
-      let handlers = {
-        onTail: null,
-        onStandard: null
-      }
-      beforeEach(() => {
-        handlers.onTail = sinon.stub()
-        handlers.onStandard = sinon.stub()
+      const getExpected = (paramsToUpdate) => paramsToUpdate.withMutations((newParams) => {
+        newParams.delete('onTail')
+        newParams.delete('onStandard')
+        newParams.set('beforeEnd', prepareRequest)
+        newParams.set('afterEnd', handleResponse)
+      }).toJS()
+      beforeEach(() => { 
+        params = params.mergeDeep(fromJS({
+          onTail: sinon.stub(),
+          onStandard: sinon.stub()
+        }))
       })
-      it('should dispatch the request action and call onStandard if tail.opt is not provided', (done) => {
-        const opt = {}
-        const updatedParams = {
-          opt,
-          ...params
-        }
-        handleRequest(updatedParams, handlers)
-        should(updatedParams.dispatch.args[0][0]).deepEqual({
+      it('should dispatch the request action and call onStandard if options.tail is not provided', (done) => {
+        const options = {}
+        // set an empty options
+        const updatedParams = params.set('options', options)
+        const expectedParams = getExpected(updatedParams)
+        params = updatedParams.toJS()
+        const { onTail, onStandard, dispatch } = params
+        handleRequest(params)
+        should(dispatch.args[0][0]).deepEqual({
           type: 'tahoe.request',
-          payload: opt
+          payload: options
         })
-        should(handlers.onTail.called).equal(false)
-        should(handlers.onStandard.args[0]).deepEqual([
-          updatedParams,
-          { beforeEnd: prepareRequest }
-        ])
+
+        // onTail shouldn't be called
+        should(onTail.called).equal(false)
+        
+        // onStandard should receive expectedParams
+        should(onStandard.args[0][0]).deepEqual(expectedParams)
         done()
       })
       it('should dispatch the request action and call onTail if tail.opt is provided', (done) => {
-        const opt = {
+        const options = {
           tail : true
         }
-        const updatedParams = {
-          opt,
-          ...params
-        }
-        handleRequest(updatedParams, handlers)
-        should(updatedParams.dispatch.args[0][0]).deepEqual({
+        const updatedParams = params.set('options', options)
+        const expectedParams = getExpected(updatedParams)
+        params = updatedParams.toJS()
+        const { dispatch, onTail, onStandard } = params
+        handleRequest(params)
+        should(dispatch.args[0][0]).deepEqual({
           type: 'tahoe.request',
-          payload: opt
+          payload: options
         })
-        should(handlers.onStandard.called).equal(false)
-        should(handlers.onTail.args[0][0]).deepEqual(updatedParams)
+        should(onStandard.called).equal(false)
+        should(onTail.args[0][0]).deepEqual(expectedParams)
         done()
       })
     })
     describe('the handleStandardRequest helper', () => {
       it('should get a new request call beforeEnd and call request.end', (done) => {
-        const opt = {
+        const options = {
           method: 'GET',
           endpoint: '/test'
         }
-        const updatedParams = {
-          opt,
-          ...params
-        }
+        const afterEndStub = sinon.stub()
+        const beforeEndStub = sinon.stub()
+        params = params.mergeDeep(fromJS({
+          options,
+          beforeEnd: beforeEndStub,
+          afterEnd: afterEndStub
+        })).toJS()
+
         const getRequestStub = sinon.stub(request, 'get')
         const requestStub = {
           end: sinon.stub()
         }
-        const beforeEndStub = sinon.stub()
         getRequestStub.returns(requestStub)
-        handleStandardRequest(updatedParams, { beforeEnd: beforeEndStub })
-        
+        handleStandardRequest(params)
         // should pass the endpoint into the right request function
         should(getRequestStub.args[0]).deepEqual([
           '/test'
@@ -285,10 +292,9 @@ describe('sendRequest', () => {
 
         // should pass opt and the request object into beforeEnd
         should(beforeEndStub.args[0]).deepEqual([
-          opt,
+          options,
           requestStub
         ])
-
         // TODO: assert the actual contents of whats
         // passed into end
         should(requestStub.end.calledOnce).equal(true)
