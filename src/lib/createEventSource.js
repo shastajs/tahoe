@@ -1,4 +1,4 @@
-import url from 'url'
+import combineUrl from './combineUrl'
 import entify from './entify'
 
 const handleMessage = (opt, dispatch, fn) => ({ data }) => {
@@ -47,18 +47,11 @@ const handleDelete = ({ prev }, opt, dispatch) =>
     }
   })
 
-const combineUrl = (endpoint, query) => {
-  const ay = url.parse(endpoint, true)
-  delete ay.querystring
-  ay.query = {
-    ...ay.query,
-    ...query
-  }
-  return url.format(ay)
-}
 export default (opt, dispatch) => {
   const finalUrl = combineUrl(opt.endpoint, opt.query)
   const src = new EventSource(finalUrl, { withCredentials: opt.withCredentials })
+
+  // TODO: handle open, close
   src.addEventListener('insert', handleMessage(opt, dispatch, handleInsert))
   src.addEventListener('update', handleMessage(opt, dispatch, handleUpdate))
   src.addEventListener('delete', handleMessage(opt, dispatch, handleDelete))
