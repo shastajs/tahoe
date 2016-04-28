@@ -92,13 +92,15 @@ var setSubsetError = function setSubsetError(state, _ref6) {
 };
 
 var setSubsetOpen = function setSubsetOpen(state, _ref7) {
-  var subset = _ref7.meta.subset;
+  var _ref7$meta = _ref7.meta;
+  var subset = _ref7$meta.subset;
+  var collection = _ref7$meta.collection;
 
   if (!subset) return state;
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.set('pending', false);
+    return subset.set('pending', false).set('data', collection ? (0, _immutable.List)() : (0, _immutable.Map)()).set('entities', (0, _immutable.Set)());
   });
 };
 

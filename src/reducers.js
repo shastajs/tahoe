@@ -71,12 +71,15 @@ const setSubsetError = (state, { meta: { subset }, payload }) => {
   )
 }
 
-const setSubsetOpen = (state, { meta: { subset } }) => {
+const setSubsetOpen = (state, { meta: { subset, collection } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
   if (!state.hasIn(path)) return state // subset doesnt exist
   return state.updateIn(path, (subset) =>
-    subset.set('pending', false)
+    subset
+      .set('pending', false)
+      .set('data', collection ? List() : Map())
+      .set('entities', Set())
   )
 }
 
