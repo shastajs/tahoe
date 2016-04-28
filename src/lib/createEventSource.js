@@ -21,9 +21,9 @@ export default ({ options, dispatch }) => {
   Object.keys(handlers).forEach((eventName) => {
     const handler = handlers[eventName]
     src.addEventListener(eventName, ({ data }) => {
-      const parsed = data && tryParse(data)
+      const parsed = data && tryParse({ options, dispatch, data })
       if (data && typeof parsed === 'undefined') return
-      handler({ data: parsed, options, dispatch })
+      handler({ options, dispatch, data: parsed })
     }, false)
   })
 }

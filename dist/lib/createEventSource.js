@@ -47,9 +47,9 @@ exports.default = function (_ref2) {
     src.addEventListener(eventName, function (_ref3) {
       var data = _ref3.data;
 
-      var parsed = data && tryParse(data);
+      var parsed = data && tryParse({ options: options, dispatch: dispatch, data: data });
       if (data && typeof parsed === 'undefined') return;
-      handler({ data: parsed, options: options, dispatch: dispatch });
+      handler({ options: options, dispatch: dispatch, data: parsed });
     }, false);
   });
 };

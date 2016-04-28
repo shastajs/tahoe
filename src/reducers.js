@@ -71,6 +71,15 @@ const setSubsetError = (state, { meta: { subset }, payload }) => {
   )
 }
 
+const setSubsetOpen = (state, { meta: { subset } }) => {
+  if (!subset) return state
+  const path = [ 'subsets', subset ]
+  if (!state.hasIn(path)) return state // subset doesnt exist
+  return state.updateIn(path, (subset) =>
+    subset.set('pending', false)
+  )
+}
+
 const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { raw, normalized } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
@@ -135,6 +144,7 @@ export const api = handleActions({
   'tahoe.request': createSubset,
   'tahoe.failure': setSubsetError,
   'tahoe.success': compose(setSubsetData, addEntities),
+  'tahoe.tail.open': setSubsetOpen,
   'tahoe.tail.insert': compose(insertSubsetDataItem, addEntities),
   'tahoe.tail.update': compose(updateSubsetDataItem, updateEntities),
   'tahoe.tail.delete': compose(deleteSubsetDataItem, deleteEntities)

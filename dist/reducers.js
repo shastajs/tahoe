@@ -91,13 +91,24 @@ var setSubsetError = function setSubsetError(state, _ref6) {
   });
 };
 
-var insertSubsetDataItem = function insertSubsetDataItem(state, _ref7) {
-  var _ref7$meta = _ref7.meta;
-  var subset = _ref7$meta.subset;
-  var collection = _ref7$meta.collection;
-  var _ref7$payload = _ref7.payload;
-  var raw = _ref7$payload.raw;
-  var normalized = _ref7$payload.normalized;
+var setSubsetOpen = function setSubsetOpen(state, _ref7) {
+  var subset = _ref7.meta.subset;
+
+  if (!subset) return state;
+  var path = ['subsets', subset];
+  if (!state.hasIn(path)) return state; // subset doesnt exist
+  return state.updateIn(path, function (subset) {
+    return subset.set('pending', false);
+  });
+};
+
+var insertSubsetDataItem = function insertSubsetDataItem(state, _ref8) {
+  var _ref8$meta = _ref8.meta;
+  var subset = _ref8$meta.subset;
+  var collection = _ref8$meta.collection;
+  var _ref8$payload = _ref8.payload;
+  var raw = _ref8$payload.raw;
+  var normalized = _ref8$payload.normalized;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -118,11 +129,11 @@ var insertSubsetDataItem = function insertSubsetDataItem(state, _ref7) {
   });
 };
 
-var updateSubsetDataItem = function updateSubsetDataItem(state, _ref8) {
-  var _ref8$meta = _ref8.meta;
-  var subset = _ref8$meta.subset;
-  var collection = _ref8$meta.collection;
-  var raw = _ref8.payload.raw;
+var updateSubsetDataItem = function updateSubsetDataItem(state, _ref9) {
+  var _ref9$meta = _ref9.meta;
+  var subset = _ref9$meta.subset;
+  var collection = _ref9$meta.collection;
+  var raw = _ref9.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -142,11 +153,11 @@ var updateSubsetDataItem = function updateSubsetDataItem(state, _ref8) {
     return data.set(idx, next);
   });
 };
-var deleteSubsetDataItem = function deleteSubsetDataItem(state, _ref9) {
-  var _ref9$meta = _ref9.meta;
-  var subset = _ref9$meta.subset;
-  var collection = _ref9$meta.collection;
-  var raw = _ref9.payload.raw;
+var deleteSubsetDataItem = function deleteSubsetDataItem(state, _ref10) {
+  var _ref10$meta = _ref10.meta;
+  var subset = _ref10$meta.subset;
+  var collection = _ref10$meta.collection;
+  var raw = _ref10.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -173,6 +184,7 @@ var api = exports.api = (0, _reduxActions.handleActions)({
   'tahoe.request': createSubset,
   'tahoe.failure': setSubsetError,
   'tahoe.success': (0, _reduceReducers2.default)(setSubsetData, addEntities),
+  'tahoe.tail.open': setSubsetOpen,
   'tahoe.tail.insert': (0, _reduceReducers2.default)(insertSubsetDataItem, addEntities),
   'tahoe.tail.update': (0, _reduceReducers2.default)(updateSubsetDataItem, updateEntities),
   'tahoe.tail.delete': (0, _reduceReducers2.default)(deleteSubsetDataItem, deleteEntities)
