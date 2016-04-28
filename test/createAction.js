@@ -4,7 +4,7 @@
 import { fromJS } from 'immutable'
 import should from 'should'
 import {  createAction } from '../src'
-import { mergeOptions, handleOptions } from '../src/lib/createAction'
+import { mergeOptions } from '../src/lib/createAction'
 
 describe('createAction', () => {
   it('should exist', (done) => {
@@ -39,46 +39,6 @@ describe('createAction', () => {
         updated.set('collection', false)
       })
       should(result).be.deepEqual(expected.toJS())
-      done()
-    })
-  })
-  describe('handleOptions', () => {
-    let passedInOptions = null
-    const onSuccess = (options) => {
-      passedInOptions = options
-    }
-    beforeEach(() => {
-      passedInOptions = null
-    })
-    it('should exist', (done) => {
-      should.exist(handleOptions)
-      done()
-    })
-    it('should throw an error if endpoint isn\'t set', (done) =>{
-      should.throws(
-        () => {
-          handleOptions({ method: 'test' }, onSuccess)
-        },
-        /Missing endpoint/
-      )
-      done()
-    })
-    it('should throw an error if method isn\'t set', (done) =>{
-      should.throws(
-        () => {
-          handleOptions({ endpoint: 'test' }, onSuccess)
-        },
-        /Missing method/
-      )
-      done()
-    })
-    it('should pass options into onSuccess', (done) => {
-      const options = {
-        method: 'test',
-        endpoint: 'test'
-      }
-      handleOptions(options, onSuccess)
-      should(passedInOptions).be.deepEqual(options)
       done()
     })
   })

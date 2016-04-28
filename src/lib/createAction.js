@@ -38,14 +38,9 @@ export const mergeOptions = (defaults, opt) => {
   })
 }
 
-// handle errors and pass the options into a callback
-export const handleOptions = (options, onSuccess) => {
-  if (!options.method) throw new Error('Missing method')
-  if (!options.endpoint) throw new Error('Missing endpoint')
-  return onSuccess(options)
-}
-
 export default (defaults = {}) => (opt = {}) => {
   const options = mergeOptions(defaults, opt)
-  return handleOptions(options, sendRequest)
+  if (!options.method) throw new Error('Missing method')
+  if (!options.endpoint) throw new Error('Missing endpoint')
+  return (dispatch) => sendRequest({ options, dispatch })
 }

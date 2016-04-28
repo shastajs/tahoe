@@ -4,90 +4,54 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends2 = require('babel-runtime/helpers/extends');
+var _keys = require('babel-runtime/core-js/object/keys');
 
-var _extends3 = _interopRequireDefault(_extends2);
+var _keys2 = _interopRequireDefault(_keys);
 
-var _url = require('url');
+var _combineUrl = require('./combineUrl');
 
-var _url2 = _interopRequireDefault(_url);
+var _combineUrl2 = _interopRequireDefault(_combineUrl);
 
-var _entify = require('./entify');
+var _eventHandlers = require('./eventHandlers');
 
-var _entify2 = _interopRequireDefault(_entify);
+var _eventHandlers2 = _interopRequireDefault(_eventHandlers);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var handleMessage = function handleMessage(opt, dispatch, fn) {
-  return function (_ref) {
-    var data = _ref.data;
+var tryParse = function tryParse(_ref) {
+  var data = _ref.data;
+  var options = _ref.options;
+  var dispatch = _ref.dispatch;
 
-    try {
-      fn(JSON.parse(data), opt, dispatch);
-    } catch (err) {
-      dispatch({
-        type: 'tahoe.failure',
-        meta: opt,
-        payload: err
-      });
-    }
-  };
+  try {
+    return JSON.parse(data);
+  } catch (err) {
+    dispatch({
+      type: 'tahoe.failure',
+      meta: options,
+      payload: err
+    });
+  }
 };
 
-var handleInsert = function handleInsert(_ref2, opt, dispatch) {
-  var next = _ref2.next;
-  return dispatch({
-    type: 'tahoe.tail.insert',
-    meta: opt,
-    payload: {
-      normalized: opt.model ? (0, _entify2.default)(next, opt) : null,
-      raw: next
-    }
+exports.default = function (_ref2) {
+  var options = _ref2.options;
+  var dispatch = _ref2.dispatch;
+
+  var finalUrl = (0, _combineUrl2.default)(options.endpoint, options.query);
+  var src = new EventSource(finalUrl, { withCredentials: options.withCredentials });
+
+  // wire up listeners n shiz
+  (0, _keys2.default)(_eventHandlers2.default).forEach(function (eventName) {
+    var handler = _eventHandlers2.default[eventName];
+    src.addEventListener(eventName, function (_ref3) {
+      var data = _ref3.data;
+
+      var parsed = data && tryParse(data);
+      if (data && typeof parsed === 'undefined') return;
+      handler({ data: parsed, options: options, dispatch: dispatch });
+    }, false);
   });
-};
-var handleUpdate = function handleUpdate(_ref3, opt, dispatch) {
-  var prev = _ref3.prev;
-  var next = _ref3.next;
-  return dispatch({
-    type: 'tahoe.tail.update',
-    meta: opt,
-    payload: {
-      normalized: opt.model ? {
-        prev: (0, _entify2.default)(prev, opt),
-        next: (0, _entify2.default)(next, opt)
-      } : null,
-      raw: {
-        prev: prev,
-        next: next
-      }
-    }
-  });
-};
-var handleDelete = function handleDelete(_ref4, opt, dispatch) {
-  var prev = _ref4.prev;
-  return dispatch({
-    type: 'tahoe.tail.delete',
-    meta: opt,
-    payload: {
-      normalized: opt.model ? (0, _entify2.default)(prev, opt) : null,
-      raw: prev
-    }
-  });
-};
-
-var combineUrl = function combineUrl(endpoint, query) {
-  var ay = _url2.default.parse(endpoint, true);
-  delete ay.querystring;
-  ay.query = (0, _extends3.default)({}, ay.query, query);
-  return _url2.default.format(ay);
-};
-
-exports.default = function (opt, dispatch) {
-  var finalUrl = combineUrl(opt.endpoint, opt.query);
-  var src = new EventSource(finalUrl, { withCredentials: opt.withCredentials });
-  src.addEventListener('insert', handleMessage(opt, dispatch, handleInsert));
-  src.addEventListener('update', handleMessage(opt, dispatch, handleUpdate));
-  src.addEventListener('delete', handleMessage(opt, dispatch, handleDelete));
 };
 
 module.exports = exports['default'];

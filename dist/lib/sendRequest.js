@@ -18,60 +18,70 @@ var _createEventSource2 = _interopRequireDefault(_createEventSource);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = function (opt) {
-  return function (dispatch) {
-    dispatch({
-      type: 'tahoe.request',
-      payload: opt
-    });
+var createResponseHandler = function createResponseHandler(_ref) {
+  var options = _ref.options;
+  var dispatch = _ref.dispatch;
 
-    if (opt.tail) {
-      return (0, _createEventSource2.default)(opt, dispatch);
+  var debug = options.method.toUpperCase() + ' ' + options.endpoint;
+  return function (err, res) {
+    if (!res && !err) {
+      err = new Error('Connection failed: ' + debug);
     }
-
-    var req = _superagent2.default[opt.method.toLowerCase()](opt.endpoint);
-    var debug = opt.method.toUpperCase() + ' ' + opt.endpoint;
-    if (opt.headers) {
-      req.set(opt.headers);
+    if (!err && res.type !== 'application/json') {
+      err = new Error('Unknown response type: \'' + res.type + '\' from ' + debug);
     }
-    if (opt.query) {
-      req.query(opt.query);
-    }
-    if (opt.body) {
-      req.send(opt.body);
-    }
-    if (opt.withCredentials) {
-      req.withCredentials();
-    }
-
-    req.end(function (err, res) {
-      if (!res && !err) {
-        err = new Error('Connection failed: ' + debug);
-      }
-      if (!err && res.type !== 'application/json') {
-        err = new Error('Unknown response type: \'' + res.type + '\' from ' + debug);
-      }
-      if (err) {
-        if (opt.onError) opt.onError(err);
-        return dispatch({
-          type: 'tahoe.failure',
-          meta: opt,
-          payload: err
-        });
-      }
-
-      // handle json responses
-      if (opt.onResponse) opt.onResponse(res);
+    if (err) {
       dispatch({
-        type: 'tahoe.success',
-        meta: opt,
-        payload: {
-          raw: res.body,
-          normalized: opt.model ? (0, _entify2.default)(res.body, opt) : null
-        }
+        type: 'tahoe.failure',
+        meta: options,
+        payload: err
       });
+      if (options.onError) options.onError(err);
+      return;
+    }
+
+    // handle json responses
+    dispatch({
+      type: 'tahoe.success',
+      meta: options,
+      payload: {
+        raw: res.body,
+        normalized: options.model && (0, _entify2.default)(res.body, options)
+      }
     });
+    if (options.onResponse) options.onResponse(res);
   };
+};
+
+exports.default = function (_ref2) {
+  var options = _ref2.options;
+  var dispatch = _ref2.dispatch;
+
+  dispatch({
+    type: 'tahoe.request',
+    payload: options
+  });
+
+  if (options.tail) {
+    (0, _createEventSource2.default)({ options: options, dispatch: dispatch });
+    return;
+  }
+
+  var req = _superagent2.default[options.method.toLowerCase()](options.endpoint);
+  if (options.headers) {
+    req.set(options.headers);
+  }
+  if (options.query) {
+    req.query(options.query);
+  }
+  if (options.body) {
+    req.send(options.body);
+  }
+  if (options.withCredentials) {
+    req.withCredentials();
+  }
+
+  req.end(createResponseHandler({ options: options, dispatch: dispatch }));
 };
 
 module.exports = exports['default'];

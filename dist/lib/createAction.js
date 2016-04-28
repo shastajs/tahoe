@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.mergeOptions = undefined;
 
 var _lodash = require('lodash.mapvalues');
 
@@ -41,26 +42,32 @@ all options can either be a value, or a function that returns a value.
 if you define a function, it will receive options.params as an argument
 */
 
+// merge our multitude of option objects together
+// defaults = options defined in createAction
+// opt = options specified in action creator
+var isReserved = function isReserved(k) {
+  return reserved.indexOf(k) !== -1;
+};
+
+var mergeOptions = exports.mergeOptions = function mergeOptions(defaults, opt) {
+  return (0, _lodash2.default)((0, _lodash4.default)({}, opt, defaults), function (v, k, _ref) {
+    var params = _ref.params;
+
+    if (isReserved(k)) return v;
+    return result(v, params);
+  });
+};
+
 exports.default = function () {
   var defaults = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
   return function () {
     var opt = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-    // merge our multitude of option objects together
-    // defaults = options defined in createAction
-    // opt = options specified in action creator
-    var options = (0, _lodash2.default)((0, _lodash4.default)({}, opt, defaults), function (v, k, _ref) {
-      var params = _ref.params;
-
-      if (reserved.indexOf(k) !== -1) return v;
-      return result(v, params);
-    });
-
+    var options = mergeOptions(defaults, opt);
     if (!options.method) throw new Error('Missing method');
     if (!options.endpoint) throw new Error('Missing endpoint');
-
-    return (0, _sendRequest2.default)(options);
+    return function (dispatch) {
+      return (0, _sendRequest2.default)({ options: options, dispatch: dispatch });
+    };
   };
 };
-
-module.exports = exports['default'];

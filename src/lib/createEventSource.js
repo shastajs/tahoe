@@ -1,58 +1,29 @@
 import combineUrl from './combineUrl'
-import entify from './entify'
+import handlers from './eventHandlers'
 
-const handleMessage = (opt, dispatch, fn) => ({ data }) => {
+const tryParse = ({ data, options, dispatch }) => {
   try {
-    fn(JSON.parse(data), opt, dispatch)
+    return JSON.parse(data)
   } catch (err) {
     dispatch({
       type: 'tahoe.failure',
-      meta: opt,
+      meta: options,
       payload: err
     })
   }
 }
 
-const handleInsert = ({ next }, opt, dispatch) =>
-  dispatch({
-    type: 'tahoe.tail.insert',
-    meta: opt,
-    payload: {
-      normalized: opt.model ? entify(next, opt) : null,
-      raw: next
-    }
-  })
-const handleUpdate = ({ prev, next }, opt, dispatch) =>
-  dispatch({
-    type: 'tahoe.tail.update',
-    meta: opt,
-    payload: {
-      normalized: opt.model ? {
-        prev: entify(prev, opt),
-        next: entify(next, opt)
-      } : null,
-      raw: {
-        prev: prev,
-        next: next
-      }
-    }
-  })
-const handleDelete = ({ prev }, opt, dispatch) =>
-  dispatch({
-    type: 'tahoe.tail.delete',
-    meta: opt,
-    payload: {
-      normalized: opt.model ? entify(prev, opt) : null,
-      raw: prev
-    }
-  })
+export default ({ options, dispatch }) => {
+  const finalUrl = combineUrl(options.endpoint, options.query)
+  const src = new EventSource(finalUrl, { withCredentials: options.withCredentials })
 
-export default (opt, dispatch) => {
-  const finalUrl = combineUrl(opt.endpoint, opt.query)
-  const src = new EventSource(finalUrl, { withCredentials: opt.withCredentials })
-
-  // TODO: handle open, close
-  src.addEventListener('insert', handleMessage(opt, dispatch, handleInsert))
-  src.addEventListener('update', handleMessage(opt, dispatch, handleUpdate))
-  src.addEventListener('delete', handleMessage(opt, dispatch, handleDelete))
+  // wire up listeners n shiz
+  Object.keys(handlers).forEach((eventName) => {
+    const handler = handlers[eventName]
+    src.addEventListener(eventName, ({ data }) => {
+      const parsed = data && tryParse(data)
+      if (data && typeof parsed === 'undefined') return
+      handler({ data: parsed, options, dispatch })
+    }, false)
+  })
 }
