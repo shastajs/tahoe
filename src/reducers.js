@@ -32,10 +32,10 @@ const deleteEntities = (state, { payload: { normalized } }) => {
 }
 
 // subset state
-const createSubset = (state, { payload: { subset } }) => {
+const createSubset = (state, { payload: { subset, fresh } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
-  if (state.hasIn(path)) return state
+  if (!fresh && state.hasIn(path)) return state
   const record = Map({
     id: subset,
     pending: true

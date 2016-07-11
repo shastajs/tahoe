@@ -21,6 +21,7 @@ possible options:
 - endpoint (required)(url tring)
 - model (required)(normalizr model)
 - collection (default false)(boolean)
+- fresh (default to false)(boolean)
 
 all options can either be a value, or a function that returns a value.
 if you define a function, it will receive options.params as an argument
