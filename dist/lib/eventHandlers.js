@@ -4,12 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _entify = require('./entify');
-
-var _entify2 = _interopRequireDefault(_entify);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var handlers = {};
 handlers.open = function (_ref) {
   var options = _ref.options;
@@ -28,7 +22,6 @@ handlers.insert = function (_ref2) {
     type: 'tahoe.tail.insert',
     meta: options,
     payload: {
-      normalized: options.model && (0, _entify2.default)(next, options),
       raw: next
     }
   });
@@ -44,10 +37,6 @@ handlers.update = function (_ref3) {
     type: 'tahoe.tail.update',
     meta: options,
     payload: {
-      normalized: options.model && {
-        prev: (0, _entify2.default)(prev, options),
-        next: (0, _entify2.default)(next, options)
-      },
       raw: {
         prev: prev,
         next: next
@@ -64,7 +53,6 @@ handlers.delete = function (_ref4) {
     type: 'tahoe.tail.delete',
     meta: options,
     payload: {
-      normalized: options.model && (0, _entify2.default)(prev, options),
       raw: prev
     }
   });

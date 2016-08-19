@@ -1,5 +1,4 @@
 import request from 'superagent'
-import entify from './entify'
 import createEventSource from './createEventSource'
 
 const createResponseHandler = ({ options, dispatch }) => {
@@ -26,8 +25,7 @@ const createResponseHandler = ({ options, dispatch }) => {
       type: 'tahoe.success',
       meta: options,
       payload: {
-        raw: res.body,
-        normalized: options.model && entify(res.body, options)
+        raw: res.body
       }
     })
     if (options.onResponse) options.onResponse(res)

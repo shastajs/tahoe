@@ -1,35 +1,9 @@
 import { handleActions } from 'redux-actions'
-import { Map, List, Set, fromJS } from 'immutable'
-import compose from 'reduce-reducers'
+import { Map, List, fromJS } from 'immutable'
 
 const initialState = Map({
-  subsets: Map(),
-  entities: Map()
+  subsets: Map()
 })
-
-const ensureArray = (data) =>
-  Array.isArray(data) ? data : [ data ]
-
-// possible solutions:
-// - subsets become maps that are basically pointers to existing nodes in the entities store
-// - subsets become lists of IDs and entity types
-
-// shallow entity state
-const addEntities = (state, { payload: { normalized } }) => {
-  if (!normalized) return state
-  return fromJS({ entities: normalized.entities }).mergeDeep(state)
-}
-const updateEntities = (state, { payload: { normalized } }) => {
-  if (!normalized) return state
-  // TODO: handle situation where id changed!
-  // TODO: nested relationships wonky here?
-  return state.mergeDeep(fromJS({ entities: normalized.next.entities }))
-}
-const deleteEntities = (state, { payload: { normalized } }) => {
-  if (!normalized) return state
-  // TODO
-  return state
-}
 
 // subset state
 const createSubset = (state, { payload: { subset, fresh } }) => {
@@ -43,16 +17,13 @@ const createSubset = (state, { payload: { subset, fresh } }) => {
   return state.setIn(path, record)
 }
 
-const setSubsetData = (state, { meta: { subset }, payload: { raw, normalized } }) => {
+const setSubsetData = (state, { meta: { subset }, payload: { raw } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
   if (!state.hasIn(path)) return state // subset doesnt exist
   return state.updateIn(path, (subset) =>
     subset
       .set('data', fromJS(raw))
-      .set('entities', normalized
-        ? Set(ensureArray(normalized.result))
-        : Set())
       .set('pending', false)
       .set('error', null)
   )
@@ -65,7 +36,6 @@ const setSubsetError = (state, { meta: { subset }, payload }) => {
   return state.updateIn(path, (subset) =>
     subset
       .delete('data')
-      .delete('entities')
       .set('error', payload)
       .set('pending', false)
   )
@@ -79,11 +49,10 @@ const setSubsetOpen = (state, { meta: { subset, collection } }) => {
     subset
       .set('pending', false)
       .set('data', collection ? List() : Map())
-      .set('entities', Set())
   )
 }
 
-const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { raw, normalized } }) => {
+const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { raw } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
   if (!state.hasIn(path)) return state // subset doesnt exist
@@ -96,12 +65,6 @@ const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { 
         if (data == null && collection) return List([ newData ])
         // value exists, either push or replace
         return collection ? data.push(newData) : newData
-      })
-      .update('entities', (entityIds) => {
-        if (!normalized) return entityIds
-        const arr = ensureArray(normalized.result)
-        if (entityIds == null) return Set(arr)
-        return entityIds.union(arr)
       })
   )
 }
@@ -146,9 +109,9 @@ const deleteSubsetDataItem = (state, { meta: { subset, collection }, payload: { 
 export const api = handleActions({
   'tahoe.request': createSubset,
   'tahoe.failure': setSubsetError,
-  'tahoe.success': compose(setSubsetData, addEntities),
+  'tahoe.success': setSubsetData,
   'tahoe.tail.open': setSubsetOpen,
-  'tahoe.tail.insert': compose(insertSubsetDataItem, addEntities),
-  'tahoe.tail.update': compose(updateSubsetDataItem, updateEntities),
-  'tahoe.tail.delete': compose(deleteSubsetDataItem, deleteEntities)
+  'tahoe.tail.insert': insertSubsetDataItem,
+  'tahoe.tail.update': updateSubsetDataItem,
+  'tahoe.tail.delete': deleteSubsetDataItem
 }, initialState)

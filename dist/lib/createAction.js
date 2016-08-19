@@ -35,7 +35,6 @@ possible options:
 - method (required)(get, post, put, delete, or patch)
 - params (object)
 - endpoint (required)(url tring)
-- model (required)(normalizr model)
 - collection (default false)(boolean)
 - fresh (default to false)(boolean)
 

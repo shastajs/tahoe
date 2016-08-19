@@ -8,10 +8,6 @@ var _superagent = require('superagent');
 
 var _superagent2 = _interopRequireDefault(_superagent);
 
-var _entify = require('./entify');
-
-var _entify2 = _interopRequireDefault(_entify);
-
 var _createEventSource = require('./createEventSource');
 
 var _createEventSource2 = _interopRequireDefault(_createEventSource);
@@ -45,8 +41,7 @@ var createResponseHandler = function createResponseHandler(_ref) {
       type: 'tahoe.success',
       meta: options,
       payload: {
-        raw: res.body,
-        normalized: options.model && (0, _entify2.default)(res.body, options)
+        raw: res.body
       }
     });
     if (options.onResponse) options.onResponse(res);

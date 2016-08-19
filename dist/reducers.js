@@ -9,53 +9,15 @@ var _reduxActions = require('redux-actions');
 
 var _immutable = require('immutable');
 
-var _reduceReducers = require('reduce-reducers');
-
-var _reduceReducers2 = _interopRequireDefault(_reduceReducers);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 var initialState = (0, _immutable.Map)({
-  subsets: (0, _immutable.Map)(),
-  entities: (0, _immutable.Map)()
+  subsets: (0, _immutable.Map)()
 });
 
-var ensureArray = function ensureArray(data) {
-  return Array.isArray(data) ? data : [data];
-};
-
-// possible solutions:
-// - subsets become maps that are basically pointers to existing nodes in the entities store
-// - subsets become lists of IDs and entity types
-
-// shallow entity state
-var addEntities = function addEntities(state, _ref) {
-  var normalized = _ref.payload.normalized;
-
-  if (!normalized) return state;
-  return (0, _immutable.fromJS)({ entities: normalized.entities }).mergeDeep(state);
-};
-var updateEntities = function updateEntities(state, _ref2) {
-  var normalized = _ref2.payload.normalized;
-
-  if (!normalized) return state;
-  // TODO: handle situation where id changed!
-  // TODO: nested relationships wonky here?
-  return state.mergeDeep((0, _immutable.fromJS)({ entities: normalized.next.entities }));
-};
-var deleteEntities = function deleteEntities(state, _ref3) {
-  var normalized = _ref3.payload.normalized;
-
-  if (!normalized) return state;
-  // TODO
-  return state;
-};
-
 // subset state
-var createSubset = function createSubset(state, _ref4) {
-  var _ref4$payload = _ref4.payload;
-  var subset = _ref4$payload.subset;
-  var fresh = _ref4$payload.fresh;
+var createSubset = function createSubset(state, _ref) {
+  var _ref$payload = _ref.payload;
+  var subset = _ref$payload.subset;
+  var fresh = _ref$payload.fresh;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -67,52 +29,48 @@ var createSubset = function createSubset(state, _ref4) {
   return state.setIn(path, record);
 };
 
-var setSubsetData = function setSubsetData(state, _ref5) {
-  var subset = _ref5.meta.subset;
-  var _ref5$payload = _ref5.payload;
-  var raw = _ref5$payload.raw;
-  var normalized = _ref5$payload.normalized;
+var setSubsetData = function setSubsetData(state, _ref2) {
+  var subset = _ref2.meta.subset;
+  var raw = _ref2.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.set('data', (0, _immutable.fromJS)(raw)).set('entities', normalized ? (0, _immutable.Set)(ensureArray(normalized.result)) : (0, _immutable.Set)()).set('pending', false).set('error', null);
+    return subset.set('data', (0, _immutable.fromJS)(raw)).set('pending', false).set('error', null);
   });
 };
 
-var setSubsetError = function setSubsetError(state, _ref6) {
-  var subset = _ref6.meta.subset;
-  var payload = _ref6.payload;
+var setSubsetError = function setSubsetError(state, _ref3) {
+  var subset = _ref3.meta.subset;
+  var payload = _ref3.payload;
 
   if (!subset) return state;
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.delete('data').delete('entities').set('error', payload).set('pending', false);
+    return subset.delete('data').set('error', payload).set('pending', false);
   });
 };
 
-var setSubsetOpen = function setSubsetOpen(state, _ref7) {
-  var _ref7$meta = _ref7.meta;
-  var subset = _ref7$meta.subset;
-  var collection = _ref7$meta.collection;
+var setSubsetOpen = function setSubsetOpen(state, _ref4) {
+  var _ref4$meta = _ref4.meta;
+  var subset = _ref4$meta.subset;
+  var collection = _ref4$meta.collection;
 
   if (!subset) return state;
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.set('pending', false).set('data', collection ? (0, _immutable.List)() : (0, _immutable.Map)()).set('entities', (0, _immutable.Set)());
+    return subset.set('pending', false).set('data', collection ? (0, _immutable.List)() : (0, _immutable.Map)());
   });
 };
 
-var insertSubsetDataItem = function insertSubsetDataItem(state, _ref8) {
-  var _ref8$meta = _ref8.meta;
-  var subset = _ref8$meta.subset;
-  var collection = _ref8$meta.collection;
-  var _ref8$payload = _ref8.payload;
-  var raw = _ref8$payload.raw;
-  var normalized = _ref8$payload.normalized;
+var insertSubsetDataItem = function insertSubsetDataItem(state, _ref5) {
+  var _ref5$meta = _ref5.meta;
+  var subset = _ref5$meta.subset;
+  var collection = _ref5$meta.collection;
+  var raw = _ref5.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -124,20 +82,15 @@ var insertSubsetDataItem = function insertSubsetDataItem(state, _ref8) {
       if (data == null && collection) return (0, _immutable.List)([newData]);
       // value exists, either push or replace
       return collection ? data.push(newData) : newData;
-    }).update('entities', function (entityIds) {
-      if (!normalized) return entityIds;
-      var arr = ensureArray(normalized.result);
-      if (entityIds == null) return (0, _immutable.Set)(arr);
-      return entityIds.union(arr);
     });
   });
 };
 
-var updateSubsetDataItem = function updateSubsetDataItem(state, _ref9) {
-  var _ref9$meta = _ref9.meta;
-  var subset = _ref9$meta.subset;
-  var collection = _ref9$meta.collection;
-  var raw = _ref9.payload.raw;
+var updateSubsetDataItem = function updateSubsetDataItem(state, _ref6) {
+  var _ref6$meta = _ref6.meta;
+  var subset = _ref6$meta.subset;
+  var collection = _ref6$meta.collection;
+  var raw = _ref6.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -157,11 +110,11 @@ var updateSubsetDataItem = function updateSubsetDataItem(state, _ref9) {
     return data.set(idx, next);
   });
 };
-var deleteSubsetDataItem = function deleteSubsetDataItem(state, _ref10) {
-  var _ref10$meta = _ref10.meta;
-  var subset = _ref10$meta.subset;
-  var collection = _ref10$meta.collection;
-  var raw = _ref10.payload.raw;
+var deleteSubsetDataItem = function deleteSubsetDataItem(state, _ref7) {
+  var _ref7$meta = _ref7.meta;
+  var subset = _ref7$meta.subset;
+  var collection = _ref7$meta.collection;
+  var raw = _ref7.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -187,9 +140,9 @@ var deleteSubsetDataItem = function deleteSubsetDataItem(state, _ref10) {
 var api = exports.api = (0, _reduxActions.handleActions)({
   'tahoe.request': createSubset,
   'tahoe.failure': setSubsetError,
-  'tahoe.success': (0, _reduceReducers2.default)(setSubsetData, addEntities),
+  'tahoe.success': setSubsetData,
   'tahoe.tail.open': setSubsetOpen,
-  'tahoe.tail.insert': (0, _reduceReducers2.default)(insertSubsetDataItem, addEntities),
-  'tahoe.tail.update': (0, _reduceReducers2.default)(updateSubsetDataItem, updateEntities),
-  'tahoe.tail.delete': (0, _reduceReducers2.default)(deleteSubsetDataItem, deleteEntities)
+  'tahoe.tail.insert': insertSubsetDataItem,
+  'tahoe.tail.update': updateSubsetDataItem,
+  'tahoe.tail.delete': deleteSubsetDataItem
 }, initialState);
