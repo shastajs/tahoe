@@ -59,9 +59,9 @@ var mergeOptions = exports.mergeOptions = function mergeOptions(defaults, opt) {
 };
 
 exports.default = function () {
-  var defaults = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  var defaults = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return function () {
-    var opt = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var options = mergeOptions(defaults, opt);
     if (!options.method) throw new Error('Missing method');

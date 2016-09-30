@@ -1,5 +1,6 @@
 import request from 'superagent'
 import createEventSource from './createEventSource'
+import qs from 'qs'
 
 const createResponseHandler = ({ options, dispatch }) => {
   const debug = `${options.method.toUpperCase()} ${options.endpoint}`
@@ -48,7 +49,9 @@ export default ({ options, dispatch }) => {
     req.set(options.headers)
   }
   if (options.query) {
-    req.query(options.query)
+    req.query(typeof options.query === 'string'
+      ? options.query
+      : qs.stringify(options.query))
   }
   if (options.body) {
     req.send(options.body)

@@ -12,6 +12,10 @@ var _createEventSource = require('./createEventSource');
 
 var _createEventSource2 = _interopRequireDefault(_createEventSource);
 
+var _qs = require('qs');
+
+var _qs2 = _interopRequireDefault(_qs);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var createResponseHandler = function createResponseHandler(_ref) {
@@ -67,7 +71,7 @@ exports.default = function (_ref2) {
     req.set(options.headers);
   }
   if (options.query) {
-    req.query(options.query);
+    req.query(typeof options.query === 'string' ? options.query : _qs2.default.stringify(options.query));
   }
   if (options.body) {
     req.send(options.body);
