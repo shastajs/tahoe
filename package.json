@@ -1,6 +1,6 @@
 {
   "name": "tahoe",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Dead-simple API/EventSource actions for Redux",
   "main": "dist/index.js",
   "keywords": [

@@ -19,8 +19,8 @@ var _qs2 = _interopRequireDefault(_qs);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var createResponseHandler = function createResponseHandler(_ref) {
-  var options = _ref.options;
-  var dispatch = _ref.dispatch;
+  var options = _ref.options,
+      dispatch = _ref.dispatch;
 
   var debug = options.method.toUpperCase() + ' ' + options.endpoint;
   return function (err, res) {
@@ -53,8 +53,8 @@ var createResponseHandler = function createResponseHandler(_ref) {
 };
 
 exports.default = function (_ref2) {
-  var options = _ref2.options;
-  var dispatch = _ref2.dispatch;
+  var options = _ref2.options,
+      dispatch = _ref2.dispatch;
 
   dispatch({
     type: 'tahoe.request',
@@ -71,7 +71,7 @@ exports.default = function (_ref2) {
     req.set(options.headers);
   }
   if (options.query) {
-    req.query(typeof options.query === 'string' ? options.query : _qs2.default.stringify(options.query));
+    req.query(typeof options.query === 'string' ? options.query : _qs2.default.stringify(options.query, { strictNullHandling: true }));
   }
   if (options.body) {
     req.send(options.body);

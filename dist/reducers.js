@@ -15,9 +15,9 @@ var initialState = (0, _immutable.Map)({
 
 // subset state
 var createSubset = function createSubset(state, _ref) {
-  var _ref$payload = _ref.payload;
-  var subset = _ref$payload.subset;
-  var fresh = _ref$payload.fresh;
+  var _ref$payload = _ref.payload,
+      subset = _ref$payload.subset,
+      fresh = _ref$payload.fresh;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -30,8 +30,8 @@ var createSubset = function createSubset(state, _ref) {
 };
 
 var setSubsetData = function setSubsetData(state, _ref2) {
-  var subset = _ref2.meta.subset;
-  var raw = _ref2.payload.raw;
+  var subset = _ref2.meta.subset,
+      raw = _ref2.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -42,8 +42,8 @@ var setSubsetData = function setSubsetData(state, _ref2) {
 };
 
 var setSubsetError = function setSubsetError(state, _ref3) {
-  var subset = _ref3.meta.subset;
-  var payload = _ref3.payload;
+  var subset = _ref3.meta.subset,
+      payload = _ref3.payload;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -54,9 +54,9 @@ var setSubsetError = function setSubsetError(state, _ref3) {
 };
 
 var setSubsetOpen = function setSubsetOpen(state, _ref4) {
-  var _ref4$meta = _ref4.meta;
-  var subset = _ref4$meta.subset;
-  var collection = _ref4$meta.collection;
+  var _ref4$meta = _ref4.meta,
+      subset = _ref4$meta.subset,
+      collection = _ref4$meta.collection;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -67,10 +67,10 @@ var setSubsetOpen = function setSubsetOpen(state, _ref4) {
 };
 
 var insertSubsetDataItem = function insertSubsetDataItem(state, _ref5) {
-  var _ref5$meta = _ref5.meta;
-  var subset = _ref5$meta.subset;
-  var collection = _ref5$meta.collection;
-  var raw = _ref5.payload.raw;
+  var _ref5$meta = _ref5.meta,
+      subset = _ref5$meta.subset,
+      collection = _ref5$meta.collection,
+      raw = _ref5.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -87,10 +87,10 @@ var insertSubsetDataItem = function insertSubsetDataItem(state, _ref5) {
 };
 
 var updateSubsetDataItem = function updateSubsetDataItem(state, _ref6) {
-  var _ref6$meta = _ref6.meta;
-  var subset = _ref6$meta.subset;
-  var collection = _ref6$meta.collection;
-  var raw = _ref6.payload.raw;
+  var _ref6$meta = _ref6.meta,
+      subset = _ref6$meta.subset,
+      collection = _ref6$meta.collection,
+      raw = _ref6.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];
@@ -111,10 +111,10 @@ var updateSubsetDataItem = function updateSubsetDataItem(state, _ref6) {
   });
 };
 var deleteSubsetDataItem = function deleteSubsetDataItem(state, _ref7) {
-  var _ref7$meta = _ref7.meta;
-  var subset = _ref7$meta.subset;
-  var collection = _ref7$meta.collection;
-  var raw = _ref7.payload.raw;
+  var _ref7$meta = _ref7.meta,
+      subset = _ref7$meta.subset,
+      collection = _ref7$meta.collection,
+      raw = _ref7.payload.raw;
 
   if (!subset) return state;
   var path = ['subsets', subset];

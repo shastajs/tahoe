@@ -51,7 +51,7 @@ export default ({ options, dispatch }) => {
   if (options.query) {
     req.query(typeof options.query === 'string'
       ? options.query
-      : qs.stringify(options.query))
+      : qs.stringify(options.query, { strictNullHandling: true }))
   }
   if (options.body) {
     req.send(options.body)

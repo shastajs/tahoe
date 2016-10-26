@@ -21,7 +21,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = function (endpoint, query) {
   var parsed = _url2.default.parse(endpoint);
 
-  var q = _qs2.default.stringify((0, _extends3.default)({}, _qs2.default.parse(parsed.query), query));
+  var q = _qs2.default.stringify((0, _extends3.default)({}, _qs2.default.parse(parsed.query), query), { strictNullHandling: true });
 
   return _url2.default.format({
     protocol: parsed.protocol,

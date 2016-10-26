@@ -7,7 +7,7 @@ export default (endpoint, query) => {
   const q = qs.stringify({
     ...qs.parse(parsed.query),
     ...query
-  })
+  }, { strictNullHandling: true })
 
   return url.format({
     protocol: parsed.protocol,

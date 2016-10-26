@@ -19,9 +19,9 @@ var _eventHandlers2 = _interopRequireDefault(_eventHandlers);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var tryParse = function tryParse(_ref) {
-  var data = _ref.data;
-  var options = _ref.options;
-  var dispatch = _ref.dispatch;
+  var data = _ref.data,
+      options = _ref.options,
+      dispatch = _ref.dispatch;
 
   try {
     return JSON.parse(data);
@@ -35,8 +35,8 @@ var tryParse = function tryParse(_ref) {
 };
 
 exports.default = function (_ref2) {
-  var options = _ref2.options;
-  var dispatch = _ref2.dispatch;
+  var options = _ref2.options,
+      dispatch = _ref2.dispatch;
 
   var finalUrl = (0, _combineUrl2.default)(options.endpoint, options.query);
   var src = new EventSource(finalUrl, { withCredentials: options.withCredentials });
