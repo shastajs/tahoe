@@ -5,7 +5,7 @@ export default (endpoint, query) => {
   const parsed = url.parse(endpoint)
 
   const q = qs.stringify({
-    ...qs.parse(parsed.query),
+    ...qs.parse(parsed.query, { strictNullHandling: true }),
     ...query
   }, { strictNullHandling: true })
 
