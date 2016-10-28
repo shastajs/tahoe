@@ -1,6 +1,6 @@
 {
   "name": "tahoe",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Dead-simple API/EventSource actions for Redux",
   "main": "dist/index.js",
   "keywords": [
@@ -67,7 +67,6 @@
     "github-changes": "^1.0.1",
     "mocha": "^3.0.0",
     "mochify": "^2.17.0",
-    "qs": "^6.2.1",
     "rimraf": "^2.5.0",
     "should": "^11.0.0"
   },
@@ -116,6 +115,7 @@
     "lodash.merge": "^4.0.3",
     "redux-actions": "^0.11.0",
     "superagent": "^2.2.0",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "qs": "^6.2.1"
   }
 }
