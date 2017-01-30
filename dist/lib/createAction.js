@@ -66,8 +66,10 @@ exports.default = function () {
     var options = mergeOptions(defaults, opt);
     if (!options.method) throw new Error('Missing method');
     if (!options.endpoint) throw new Error('Missing endpoint');
-    return function (dispatch) {
+    var fn = function fn(dispatch) {
       return (0, _sendRequest2.default)({ options: options, dispatch: dispatch });
     };
+    fn.options = options;
+    return fn;
   };
 };

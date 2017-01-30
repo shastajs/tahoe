@@ -42,5 +42,7 @@ export default (defaults = {}) => (opt = {}) => {
   const options = mergeOptions(defaults, opt)
   if (!options.method) throw new Error('Missing method')
   if (!options.endpoint) throw new Error('Missing endpoint')
-  return (dispatch) => sendRequest({ options, dispatch })
+  const fn = (dispatch) => sendRequest({ options, dispatch })
+  fn.options = options
+  return fn
 }
