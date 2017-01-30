@@ -60,7 +60,8 @@ var mergeOptions = exports.mergeOptions = function mergeOptions(defaults, opt) {
 
 exports.default = function () {
   var defaults = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  return function () {
+
+  var nfn = function nfn() {
     var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     var options = mergeOptions(defaults, opt);
@@ -72,4 +73,6 @@ exports.default = function () {
     fn.options = options;
     return fn;
   };
+  nfn.options = defaults;
+  return nfn;
 };
