@@ -113,9 +113,9 @@
     "immutable": "^3.7.6",
     "lodash.mapvalues": "^4.0.1",
     "lodash.merge": "^4.0.3",
+    "qs": "^6.3.0",
     "redux-actions": "^0.11.0",
     "superagent": "^2.2.0",
-    "url": "^0.11.0",
-    "qs": "^6.2.1"
+    "url": "^0.11.0"
   }
 }
