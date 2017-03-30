@@ -46,6 +46,9 @@ export default ({ options, dispatch }) => {
 
   const req = request[options.method.toLowerCase()](options.endpoint)
   if (options.headers) {
+    if (typeof options.headers === 'function') {
+      options.headers = options.headers()
+    }
     req.set(options.headers)
   }
   if (options.query) {
