@@ -9,8 +9,14 @@ var _reduxActions = require('redux-actions');
 
 var _immutable = require('immutable');
 
-var initialState = (0, _immutable.Map)({
-  subsets: (0, _immutable.Map)()
+var toImmutable = function toImmutable(v) {
+  return (0, _immutable.fromJS)(v, function (key, value) {
+    return (0, _immutable.isIndexed)(value) ? value.toList() : value.toOrderedMap();
+  });
+};
+
+var initialState = (0, _immutable.OrderedMap)({
+  subsets: (0, _immutable.OrderedMap)()
 });
 
 // subset state
@@ -22,7 +28,7 @@ var createSubset = function createSubset(state, _ref) {
   if (!subset) return state;
   var path = ['subsets', subset];
   if (!fresh && state.hasIn(path)) return state;
-  var record = (0, _immutable.Map)({
+  var record = (0, _immutable.OrderedMap)({
     id: subset,
     pending: true
   });
@@ -37,7 +43,7 @@ var setSubsetData = function setSubsetData(state, _ref2) {
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.set('data', (0, _immutable.fromJS)(raw)).set('pending', false).set('error', null);
+    return subset.set('data', toImmutable(raw)).set('pending', false).set('error', null);
   });
 };
 
@@ -62,7 +68,7 @@ var setSubsetOpen = function setSubsetOpen(state, _ref4) {
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
   return state.updateIn(path, function (subset) {
-    return subset.set('pending', false).set('data', collection ? (0, _immutable.List)() : (0, _immutable.Map)());
+    return subset.set('pending', false).set('data', collection ? (0, _immutable.List)() : (0, _immutable.OrderedMap)());
   });
 };
 
@@ -75,7 +81,7 @@ var insertSubsetDataItem = function insertSubsetDataItem(state, _ref5) {
   if (!subset) return state;
   var path = ['subsets', subset];
   if (!state.hasIn(path)) return state; // subset doesnt exist
-  var newData = (0, _immutable.fromJS)(raw);
+  var newData = toImmutable(raw);
   return state.updateIn(path, function (subset) {
     return subset.set('pending', false).update('data', function (data) {
       // first event, initialize the value
@@ -97,7 +103,7 @@ var updateSubsetDataItem = function updateSubsetDataItem(state, _ref6) {
   if (!state.hasIn(path)) return state; // subset doesnt exist
   var dataPath = [].concat(path, ['data']);
   if (!state.hasIn(dataPath)) return state; // subset has no data to update
-  var next = (0, _immutable.fromJS)(raw.next);
+  var next = toImmutable(raw.next);
   return state.updateIn(dataPath, function (data) {
     // not a list item, replace with new value
     if (!collection) return next;
