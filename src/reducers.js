@@ -1,8 +1,13 @@
 import { handleActions } from 'redux-actions'
-import { Map, List, fromJS } from 'immutable'
+import { OrderedMap, List, fromJS, isIndexed } from 'immutable'
 
-const initialState = Map({
-  subsets: Map()
+const toImmutable = (v) =>
+  fromJS(v, (key, value) =>
+    isIndexed(value) ? value.toList() : value.toOrderedMap()
+  )
+
+const initialState = OrderedMap({
+  subsets: OrderedMap()
 })
 
 // subset state
@@ -10,7 +15,7 @@ const createSubset = (state, { payload: { subset, fresh } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
   if (!fresh && state.hasIn(path)) return state
-  const record = Map({
+  const record = OrderedMap({
     id: subset,
     pending: true
   })
@@ -23,7 +28,7 @@ const setSubsetData = (state, { meta: { subset }, payload: { raw } }) => {
   if (!state.hasIn(path)) return state // subset doesnt exist
   return state.updateIn(path, (subset) =>
     subset
-      .set('data', fromJS(raw))
+      .set('data', toImmutable(raw))
       .set('pending', false)
       .set('error', null)
   )
@@ -48,7 +53,7 @@ const setSubsetOpen = (state, { meta: { subset, collection } }) => {
   return state.updateIn(path, (subset) =>
     subset
       .set('pending', false)
-      .set('data', collection ? List() : Map())
+      .set('data', collection ? List() : OrderedMap())
   )
 }
 
@@ -56,7 +61,7 @@ const insertSubsetDataItem = (state, { meta: { subset, collection }, payload: { 
   if (!subset) return state
   const path = [ 'subsets', subset ]
   if (!state.hasIn(path)) return state // subset doesnt exist
-  const newData = fromJS(raw)
+  const newData = toImmutable(raw)
   return state.updateIn(path, (subset) =>
     subset
       .set('pending', false)
@@ -75,7 +80,7 @@ const updateSubsetDataItem = (state, { meta: { subset, collection }, payload: { 
   if (!state.hasIn(path)) return state // subset doesnt exist
   const dataPath = [ ...path, 'data' ]
   if (!state.hasIn(dataPath)) return state // subset has no data to update
-  const next = fromJS(raw.next)
+  const next = toImmutable(raw.next)
   return state.updateIn(dataPath, (data) => {
     // not a list item, replace with new value
     if (!collection) return next
