@@ -1,9 +1,9 @@
 import { handleActions } from 'redux-actions'
-import { OrderedMap, List, fromJS, isIndexed } from 'immutable'
+import { OrderedMap, List, fromJS, Iterable } from 'immutable'
 
 const toImmutable = (v) =>
   fromJS(v, (key, value) =>
-    isIndexed(value) ? value.toList() : value.toOrderedMap()
+    Iterable.isIndexed(value) ? value.toList() : value.toOrderedMap()
   )
 
 const initialState = OrderedMap({
