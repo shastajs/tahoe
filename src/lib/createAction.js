@@ -31,13 +31,17 @@ if you define a function, it will receive options.params as an argument
 // opt = options specified in action creator
 const isReserved = (k) => reserved.indexOf(k) !== -1
 
-const resolveFunctions = (o) =>
-  mapValues(o, (v, k, { params }) =>
+const resolveFunctions = (o, params) =>
+  mapValues(o, (v, k) =>
     isReserved(k) ? v : result(v, params)
   )
 
-export const mergeOptions = (defaults, opt) =>
-  merge({}, resolveFunctions(opt), resolveFunctions(defaults))
+export const mergeOptions = (defaults, opt) => {
+  const defaultParams = defaults.params ? result(defaults.params) : {}
+  const optParams = opt.params ? result(opt.params) : {}
+  const params = merge({}, optParams, defaultParams)
+  return merge({}, resolveFunctions(opt, params), resolveFunctions(defaults, params))
+}
 
 export default (defaults = {}) => {
   const nfn = (opt = {}) => {

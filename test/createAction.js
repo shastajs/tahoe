@@ -17,9 +17,8 @@ describe('createAction', () => {
       onResponse: () => 'response',
       onError: () => 'error',
       method: 'GET',
-      endpoint: (params) => `${params.string}/test`,
       params: {
-        string:  '/other'
+        string: '/other'
       },
       query: { testing: 'abc' }
     }
@@ -27,6 +26,7 @@ describe('createAction', () => {
     const defaults = {
       tail: false,
       collection: false,
+      endpoint: (params) => `${params.string}/test`,
       query: () => ({ test: 123 })
     }
 
