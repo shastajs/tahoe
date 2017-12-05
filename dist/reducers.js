@@ -11,7 +11,7 @@ var _immutable = require('immutable');
 
 var toImmutable = function toImmutable(v) {
   return (0, _immutable.fromJS)(v, function (key, value) {
-    return (0, _immutable.isIndexed)(value) ? value.toList() : value.toOrderedMap();
+    return _immutable.Iterable.isIndexed(value) ? value.toList() : value.toOrderedMap();
   });
 };
 
