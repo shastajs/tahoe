@@ -1,9 +1,9 @@
 /*global it: true, describe: true, beforeEach: true */
 /*eslint no-console: 0*/
 
-import { fromJS } from 'immutable'
+import { fromJS, Map } from 'immutable'
 import should from 'should'
-import {  createAction } from '../src'
+import { createAction } from '../src'
 import { mergeOptions } from '../src/lib/createAction'
 
 describe('createAction', () => {
@@ -20,12 +20,14 @@ describe('createAction', () => {
       endpoint: (params) => `${params.string}/test`,
       params: {
         string:  '/other'
-      }
+      },
+      query: { testing: 'abc' }
     }
 
     const defaults = {
       tail: false,
-      collection: false
+      collection: false,
+      query: () => ({ test: 123 })
     }
 
     it('should exist', (done) => {
@@ -37,6 +39,10 @@ describe('createAction', () => {
       const expected = fromJS(opt).withMutations((updated) => {
         updated.set('endpoint', '/other/test')
         updated.set('collection', false)
+        updated.set('query', Map({
+          test: 123,
+          testing: 'abc'
+        }))
       })
       should(result).be.deepEqual(expected.toJS())
       done()

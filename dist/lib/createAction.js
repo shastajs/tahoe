@@ -49,13 +49,15 @@ var isReserved = function isReserved(k) {
   return reserved.indexOf(k) !== -1;
 };
 
-var mergeOptions = exports.mergeOptions = function mergeOptions(defaults, opt) {
-  return (0, _lodash2.default)((0, _lodash4.default)({}, opt, defaults), function (v, k, _ref) {
+var resolveFunctions = function resolveFunctions(o) {
+  return (0, _lodash2.default)(o, function (v, k, _ref) {
     var params = _ref.params;
-
-    if (isReserved(k)) return v;
-    return result(v, params);
+    return isReserved(k) ? v : result(v, params);
   });
+};
+
+var mergeOptions = exports.mergeOptions = function mergeOptions(defaults, opt) {
+  return (0, _lodash4.default)({}, resolveFunctions(opt), resolveFunctions(defaults));
 };
 
 exports.default = function () {
