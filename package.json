@@ -107,7 +107,8 @@
     "lodash.merge": "^4.6.0",
     "qs": "^6.5.1",
     "redux-actions": "^2.2.1",
-    "superagent": "^3.8.1",
-    "url": "^0.11.0"
+    "superagent": "^3.8.2",
+    "url": "^0.11.0",
+    "url-join": "^2.0.4"
   }
 }
