@@ -1,6 +1,6 @@
 {
   "name": "tahoe",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Dead-simple API/EventSource actions for Redux",
   "main": "dist/index.js",
   "keywords": [
@@ -88,10 +88,6 @@
       "__DEV__": true,
       "__PROD__": true,
       "__INITIAL_STATE__": true
-    },
-    "ecmaFeatures": {
-      "modules": true,
-      "jsx": true
     },
     "rules": {
       "semi": [
