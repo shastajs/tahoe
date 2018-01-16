@@ -57,9 +57,9 @@
     "eslint-config-rackt": "^1.1.1",
     "eslint-plugin-react": "^7.0.0",
     "mocha": "^4.0.0",
-    "mochify": "^4.0.0",
+    "mochify": "^5.0.0",
     "rimraf": "^2.6.2",
-    "should": "^13.0.0"
+    "should": "^13.2.1"
   },
   "babel": {
     "sourceMaps": "inline",
@@ -109,6 +109,6 @@
     "redux-actions": "^2.2.1",
     "superagent": "^3.8.2",
     "url": "^0.11.0",
-    "url-join": "^2.0.4"
+    "url-join": "^2.0.5"
   }
 }

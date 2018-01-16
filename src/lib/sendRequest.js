@@ -61,4 +61,6 @@ export default ({ options, dispatch }) => {
   }
 
   req.end(createResponseHandler({ options, dispatch }))
+
+  return req
 }
