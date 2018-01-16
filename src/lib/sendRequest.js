@@ -33,15 +33,14 @@ const createResponseHandler = ({ options, dispatch }) => {
   }
 }
 
-export default ({ options, dispatch }) => {
+export default async ({ options, dispatch }) => {
   dispatch({
     type: 'tahoe.request',
     payload: options
   })
 
   if (options.tail) {
-    createEventSource({ options, dispatch })
-    return
+    return createEventSource({ options, dispatch })
   }
 
   const req = request[options.method.toLowerCase()](options.endpoint)

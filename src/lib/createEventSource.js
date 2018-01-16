@@ -13,7 +13,7 @@ const tryParse = ({ data, options, dispatch }) => {
   }
 }
 
-export default ({ options, dispatch }) => {
+export default async ({ options, dispatch }) => {
   const finalUrl = combineUrl(options.endpoint, options.query)
   const src = new EventSource(finalUrl, { withCredentials: options.withCredentials })
 
