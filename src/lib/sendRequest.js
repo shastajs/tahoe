@@ -12,6 +12,7 @@ const createResponseHandler = ({ options, dispatch }) => {
       err = new Error(`Unknown response type: '${res.type}' from ${debug}`)
     }
     if (err) {
+      err.res = res
       dispatch({
         type: 'tahoe.failure',
         meta: options,
