@@ -2,7 +2,7 @@ import request from 'superagent'
 import createEventSource from './createEventSource'
 import qs from 'qs'
 
-const createResponseHandler = ({ options, dispatch }) => {
+const createResponseHandler = ({ options, dispatch, reject, resolve }) => {
   const debug = `${options.method.toUpperCase()} ${options.endpoint}`
   return (err, res) => {
     if (!res && !err) {
@@ -19,7 +19,7 @@ const createResponseHandler = ({ options, dispatch }) => {
         payload: err
       })
       if (options.onError) options.onError(err, res)
-      return
+      return reject(err)
     }
 
     // handle json responses
@@ -31,6 +31,7 @@ const createResponseHandler = ({ options, dispatch }) => {
       }
     })
     if (options.onResponse) options.onResponse(res)
+    resolve(res)
   }
 }
 
@@ -60,7 +61,12 @@ export default async ({ options, dispatch }) => {
     req.withCredentials()
   }
 
-  req.end(createResponseHandler({ options, dispatch }))
-
-  return req
+  return new Promise((resolve, reject) => {
+    req.end(createResponseHandler({
+      options,
+      dispatch,
+      reject,
+      resolve
+    }))
+  })
 }
