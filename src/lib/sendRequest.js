@@ -24,7 +24,8 @@ const createResponseHandler = ({ options, dispatch, reject, resolve }) => {
       type: 'tahoe.success',
       meta: options,
       payload: {
-        raw: res.body
+        raw: res.body,
+        text: res.text
       }
     })
     if (options.onResponse) options.onResponse(res)
