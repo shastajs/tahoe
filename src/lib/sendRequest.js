@@ -8,9 +8,6 @@ const createResponseHandler = ({ options, dispatch, reject, resolve }) => {
     if (!res && !err) {
       err = new Error(`Connection failed: ${debug}`)
     }
-    if (!err && res.type !== 'application/json') {
-      err = new Error(`Unknown response type: '${res.type}' from ${debug}`)
-    }
     if (err) {
       err.res = res
       dispatch({
