@@ -22,13 +22,14 @@ const createSubset = (state, { payload: { subset, fresh } }) => {
   return state.setIn(path, record)
 }
 
-const setSubsetData = (state, { meta: { subset }, payload: { raw } }) => {
+const setSubsetData = (state, { meta: { subset }, payload: { raw, text } }) => {
   if (!subset) return state
   const path = [ 'subsets', subset ]
   if (!state.hasIn(path)) return state // subset doesnt exist
   return state.updateIn(path, (subset) =>
     subset
       .set('data', toImmutable(raw))
+      .set('text', text)
       .set('pending', false)
       .set('error', null)
   )
@@ -41,6 +42,7 @@ const setSubsetError = (state, { meta: { subset }, payload }) => {
   return state.updateIn(path, (subset) =>
     subset
       .delete('data')
+      .delete('text')
       .set('error', payload)
       .set('pending', false)
   )
