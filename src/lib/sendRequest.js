@@ -15,6 +15,7 @@ const createResponseHandler = ({ options, dispatch, reject, resolve }) => {
         meta: options,
         payload: err
       })
+      if (options.onGlobalError) options.onGlobalError(err, res)
       if (options.onError) options.onError(err, res)
       return reject(err)
     }
