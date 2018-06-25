@@ -4,7 +4,8 @@ import sendRequest from './sendRequest'
 
 const reserved = [
   'onResponse',
-  'onError'
+  'onError',
+  'onGlobalError'
 ]
 const result = (fn, arg) => typeof fn === 'function' ? fn(arg) : fn
 
