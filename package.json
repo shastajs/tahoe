@@ -1,6 +1,6 @@
 {
   "name": "tahoe",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Dead-simple API/EventSource actions for Redux",
   "main": "dist/index.js",
   "keywords": [
@@ -42,7 +42,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.2",
+    "babel-eslint": "^8.2.5",
     "babel-loader": "^7.1.3",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-runtime": "^6.4.3",
@@ -55,7 +55,7 @@
     "eslint": "^4.18.1",
     "eslint-cli": "^1.1.1",
     "eslint-config-rackt": "^1.1.1",
-    "eslint-plugin-react": "^7.7.0",
+    "eslint-plugin-react": "^7.10.0",
     "mocha": "^5.0.0",
     "mochify": "^5.0.0",
     "rimraf": "^2.6.2",
